@@ -8,11 +8,14 @@ var figures: Array = []
 
 var selected_figure: Vector2i = Vector2i(-1, -1)
 
+func _get_figure(position: Vector2i) -> Figure: 
+	return figures[position.x][position.y]
+
 # _setsFigure to the given state.
 # This does not validate anything.
-func _setFigure(x: int, y: int, color: Figure.COLOR, type: Figure.TYPE):
-	figures[x][y].color = color
-	figures[x][y].type = type
+func _set_figure(position: Vector2i, color: Figure.COLOR, type: Figure.TYPE):
+	_get_figure(position).color = color
+	_get_figure(position).type = type
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -33,41 +36,41 @@ func _ready():
 			figures[x].append(figure)
 			add_child(figures[x][y])
 	
-	_setFigure(0, 0, Figure.COLOR.white, Figure.TYPE.rook)
-	_setFigure(1, 0, Figure.COLOR.white, Figure.TYPE.knight)
-	_setFigure(2, 0, Figure.COLOR.white, Figure.TYPE.bishop)
-	_setFigure(3, 0, Figure.COLOR.white, Figure.TYPE.queen)
-	_setFigure(4, 0, Figure.COLOR.white, Figure.TYPE.king)
-	_setFigure(5, 0, Figure.COLOR.white, Figure.TYPE.bishop)
-	_setFigure(6, 0, Figure.COLOR.white, Figure.TYPE.knight)
-	_setFigure(7, 0, Figure.COLOR.white, Figure.TYPE.rook)
+	_set_figure(Vector2i(0, 0), Figure.COLOR.white, Figure.TYPE.rook)
+	_set_figure(Vector2i(1, 0), Figure.COLOR.white, Figure.TYPE.knight)
+	_set_figure(Vector2i(2, 0), Figure.COLOR.white, Figure.TYPE.bishop)
+	_set_figure(Vector2i(3, 0), Figure.COLOR.white, Figure.TYPE.queen)
+	_set_figure(Vector2i(4, 0), Figure.COLOR.white, Figure.TYPE.king)
+	_set_figure(Vector2i(5, 0), Figure.COLOR.white, Figure.TYPE.bishop)
+	_set_figure(Vector2i(6, 0), Figure.COLOR.white, Figure.TYPE.knight)
+	_set_figure(Vector2i(7, 0), Figure.COLOR.white, Figure.TYPE.rook)
 	
-	_setFigure(0, 1, Figure.COLOR.white, Figure.TYPE.pawn)
-	_setFigure(1, 1, Figure.COLOR.white, Figure.TYPE.pawn)
-	_setFigure(2, 1, Figure.COLOR.white, Figure.TYPE.pawn)
-	_setFigure(3, 1, Figure.COLOR.white, Figure.TYPE.pawn)
-	_setFigure(4, 1, Figure.COLOR.white, Figure.TYPE.pawn)
-	_setFigure(5, 1, Figure.COLOR.white, Figure.TYPE.pawn)
-	_setFigure(6, 1, Figure.COLOR.white, Figure.TYPE.pawn)
-	_setFigure(7, 1, Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(0, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(1, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(2, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(3, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(4, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(5, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(6, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(Vector2i(7, 1), Figure.COLOR.white, Figure.TYPE.pawn)
 	
-	_setFigure(0, 7, Figure.COLOR.black, Figure.TYPE.rook)
-	_setFigure(1, 7, Figure.COLOR.black, Figure.TYPE.knight)
-	_setFigure(2, 7, Figure.COLOR.black, Figure.TYPE.bishop)
-	_setFigure(3, 7, Figure.COLOR.black, Figure.TYPE.queen)
-	_setFigure(4, 7, Figure.COLOR.black, Figure.TYPE.king)
-	_setFigure(5, 7, Figure.COLOR.black, Figure.TYPE.bishop)
-	_setFigure(6, 7, Figure.COLOR.black, Figure.TYPE.knight)
-	_setFigure(7, 7, Figure.COLOR.black, Figure.TYPE.rook)
+	_set_figure(Vector2i(0, 7), Figure.COLOR.black, Figure.TYPE.rook)
+	_set_figure(Vector2i(1, 7), Figure.COLOR.black, Figure.TYPE.knight)
+	_set_figure(Vector2i(2, 7), Figure.COLOR.black, Figure.TYPE.bishop)
+	_set_figure(Vector2i(3, 7), Figure.COLOR.black, Figure.TYPE.queen)
+	_set_figure(Vector2i(4, 7), Figure.COLOR.black, Figure.TYPE.king)
+	_set_figure(Vector2i(5, 7), Figure.COLOR.black, Figure.TYPE.bishop)
+	_set_figure(Vector2i(6, 7), Figure.COLOR.black, Figure.TYPE.knight)
+	_set_figure(Vector2i(7, 7), Figure.COLOR.black, Figure.TYPE.rook)
 	
-	_setFigure(0, 6, Figure.COLOR.black, Figure.TYPE.pawn)
-	_setFigure(1, 6, Figure.COLOR.black, Figure.TYPE.pawn)
-	_setFigure(2, 6, Figure.COLOR.black, Figure.TYPE.pawn)
-	_setFigure(3, 6, Figure.COLOR.black, Figure.TYPE.pawn)
-	_setFigure(4, 6, Figure.COLOR.black, Figure.TYPE.pawn)
-	_setFigure(5, 6, Figure.COLOR.black, Figure.TYPE.pawn)
-	_setFigure(6, 6, Figure.COLOR.black, Figure.TYPE.pawn)
-	_setFigure(7, 6, Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(0, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(1, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(2, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(3, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(4, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(5, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(6, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(Vector2i(7, 6), Figure.COLOR.black, Figure.TYPE.pawn)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -76,8 +79,10 @@ func _process(delta):
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, position: Vector2i):
 	if event is InputEventMouseButton:
 		if event.pressed && selected_figure != position:
-				selected_figure = position
-				print_debug("selected figure", selected_figure)
+			_get_figure(selected_figure).selected = false
+			selected_figure = position
+			_get_figure(position).selected = true
+			print_debug("selected figure", selected_figure)
 			
 
 

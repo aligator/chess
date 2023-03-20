@@ -1,7 +1,29 @@
-[gd_scene load_steps=17 format=3 uid="uid://c3lq27edumgs5"]
+[gd_scene load_steps=21 format=3 uid="uid://c3lq27edumgs5"]
 
 [ext_resource type="Script" path="res://Objects/figure.gd" id="1_86gn2"]
 [ext_resource type="Texture2D" uid="uid://br7trxrprsb0m" path="res://Art/ChessPiecesArray.png" id="1_gnfkp"]
+[ext_resource type="Texture2D" uid="uid://c18tmda7ssrj" path="res://Art/selector.png" id="3_37fiv"]
+[ext_resource type="Shader" path="res://Shaders/flash.gdshader" id="3_k70yl"]
+
+[sub_resource type="GDScript" id="GDScript_q7o54"]
+script/source = "@tool
+extends Node
+
+@onready var figure: Figure = get_node(\"../\")
+@onready var selector: Sprite2D = get_node(\"../Selector\")
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(_delta):
+	selector.visible = figure.selected
+
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f4o3t"]
+size = Vector2(16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8qev0"]
 atlas = ExtResource("1_gnfkp")
@@ -100,17 +122,27 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_f4o3t"]
-size = Vector2(60, 60)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jh7c4"]
+shader = ExtResource("3_k70yl")
+shader_parameter/override_color = Color(0.65098, 0, 0, 1)
+shader_parameter/flash_color = Color(0.74902, 0, 0, 1)
+shader_parameter/flash_speed = 6.638
 
 [node name="Figure" type="Area2D"]
-scale = Vector2(0.3, 0.3)
 script = ExtResource("1_86gn2")
 
+[node name="EditorScript" type="Node" parent="."]
+script = SubResource("GDScript_q7o54")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_f4o3t")
+
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.3, 0.3)
 sprite_frames = SubResource("SpriteFrames_66pm2")
 animation = &"white"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(7.94729e-07, 1.66667)
-shape = SubResource("RectangleShape2D_f4o3t")
+[node name="Selector" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("ShaderMaterial_jh7c4")
+texture = ExtResource("3_37fiv")
