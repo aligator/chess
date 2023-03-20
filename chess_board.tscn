@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://be43cg5h2d73s"]
+
+[ext_resource type="Script" path="res://chess_board.gd" id="1_1iw3g"]
+[ext_resource type="Texture2D" uid="uid://canm3h7lk0cat" path="res://Art/board_tiles.png" id="1_ib75b"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4hg6k"]
+texture = ExtResource("1_ib75b")
+0:0/0 = 0
+1:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_vu2p3"]
+sources/0 = SubResource("TileSetAtlasSource_4hg6k")
+
+[node name="ChessBoard" type="Node2D"]
+script = ExtResource("1_1iw3g")
+
+[node name="TileMap" type="TileMap" parent="."]
+position = Vector2(16, 16)
+tile_set = SubResource("TileSet_vu2p3")
+format = 2
+layer_0/tile_data = PackedInt32Array(65537, 65536, 0, 65538, 0, 0, 65539, 65536, 0, 65540, 0, 0, 65541, 65536, 0, 65543, 65536, 0, 65542, 0, 0, 131079, 0, 0, 131077, 0, 0, 131075, 0, 0, 131073, 0, 0, 196610, 0, 0, 196612, 0, 0, 196614, 0, 0, 262145, 0, 0, 262147, 0, 0, 262149, 0, 0, 262151, 0, 0, 327682, 0, 0, 327684, 0, 0, 327686, 0, 0, 131074, 65536, 0, 131076, 65536, 0, 131078, 65536, 0, 196615, 65536, 0, 196613, 65536, 0, 196611, 65536, 0, 196609, 65536, 0, 262146, 65536, 0, 262148, 65536, 0, 262150, 65536, 0, 327687, 65536, 0, 327685, 65536, 0, 327683, 65536, 0, 327681, 65536, 0, 393218, 65536, 0, 393220, 65536, 0, 393222, 65536, 0, 458753, 65536, 0, 458755, 65536, 0, 458757, 65536, 0, 458759, 65536, 0, 393217, 0, 0, 393219, 0, 0, 393221, 0, 0, 393223, 0, 0, 458758, 0, 0, 458756, 0, 0, 458754, 0, 0, 0, 65536, 0, 2, 65536, 0, 4, 65536, 0, 6, 65536, 0, 131072, 65536, 0, 262144, 65536, 0, 393216, 65536, 0, 65536, 0, 0, 196608, 0, 0, 327680, 0, 0, 458752, 0, 0, 1, 0, 0, 3, 0, 0, 5, 0, 0, 7, 0, 0)
