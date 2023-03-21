@@ -1,3 +1,6 @@
+# This chess implementation uses a very naive approach using a two dimensional
+# array. It should easily be fast enough to just check one figure.
+
 extends Node2D
 
 @export var figure_scene: PackedScene = preload("res://Objects/figure.tscn")
@@ -9,6 +12,9 @@ var figures: Array = []
 var selected_figure: Vector2i = Vector2i(-1, -1)
 
 func _get_figure(position: Vector2i) -> Figure: 
+	if position.x < 0 || position.x >= 8 || position.y < 0 || position.y >= 8:
+		return null
+		
 	return figures[position.x][position.y]
 
 # _setsFigure to the given state.
@@ -16,6 +22,9 @@ func _get_figure(position: Vector2i) -> Figure:
 func _set_figure(position: Vector2i, color: Figure.COLOR, type: Figure.TYPE):
 	_get_figure(position).color = color
 	_get_figure(position).type = type
+
+func _to_map(position: Vector2i) -> Vector2i:
+	return Vector2i(position.x, 7 - position.y)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -79,10 +88,42 @@ func _process(delta):
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, position: Vector2i):
 	if event is InputEventMouseButton:
 		if event.pressed && selected_figure != position:
-			_get_figure(selected_figure).selected = false
+			if _get_figure(selected_figure) != null:
+				_get_figure(selected_figure).selected = false
 			selected_figure = position
 			_get_figure(position).selected = true
-			print_debug("selected figure", selected_figure)
 			
+			var possible_moves = _get_possible_moves()
+			_highlight_all(possible_moves)
 
+func _highlight_all(positions: Array):
+	tile_map.clear_layer(1)
+	
+	for i in positions:
+		tile_map.set_cell(1, _to_map(i), 1, Vector2i(0, 0))
+				
 
+func _get_possible_moves() -> Array:
+	# I use simple KISS ifs for now. Should be easy to understand 
+	# and there is no need for any complicated algorithm.
+	
+	var selected: Figure = _get_figure(selected_figure)
+	var result: Array = []
+	
+	# The king can move in all directions, one step only.
+	if selected.type == Figure.TYPE.king:
+		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y), result)
+		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y+1), result)
+		_check(selected, Vector2i(selected_figure.x, selected_figure.y+1), result)
+		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y+1), result)
+		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y), result)
+		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y-1), result)
+		_check(selected, Vector2i(selected_figure.x, selected_figure.y-1), result)
+		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y-1), result)
+			
+	return result
+
+func _check(selected: Figure, to_check: Vector2i, result: Array):
+	var to_check_figure: Figure = _get_figure(to_check)
+	if to_check_figure != null && to_check_figure.color != selected.color:
+		result.append(to_check)
