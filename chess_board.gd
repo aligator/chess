@@ -14,6 +14,10 @@ var figures: Array = []
 
 var selected_figure: Vector2i = Vector2i(-1, -1)
 
+var king_in_danger = false
+
+var king_white = Vector2i(0, 0)
+
 func _get_figure(at: Vector2i) -> Figure: 
 	if at.x < 0 || at.x >= 8 || at.y < 0 || at.y >= 8:
 		return null
@@ -94,6 +98,28 @@ func _ready():
 func _process(_delta):
 	pass
 
+func _find_current_king():
+	for x in range(8):
+		for y in range(8):
+			var figure = _get_figure(Vector2i(x, y))
+			if figure != null && figure.color == active_player && figure.type == Figure.TYPE.king:
+				return Vector2i(x, y)
+	return null
+
+func _check_king_in_danger(king_pos: Vector2i) -> bool:
+	for x in range(8):
+		for y in range(8):
+			var enemy_figure = _get_figure(Vector2i(x, y))
+			# If it is really an enemey:
+			if enemy_figure.color != active_player:
+				var possible_moves = _get_possible_moves(Vector2i(x, y))
+				for move in possible_moves:
+					if move == king_pos:
+						return true
+						
+	return false
+
+
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: Vector2i):
 	if event is InputEventMouseButton:
 		if event.pressed && selected_figure != at:
@@ -115,6 +141,13 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 					_highlight_clear()
 					selected_figure = Vector2i(-1, -1)
 					_toggle_active_player()
+					
+					# Check if the current players king is in danger.
+					var king = _find_current_king()
+					if king == null:
+						print("no king exists")
+					else:
+						king_in_danger = _check_king_in_danger(king)
 				return
 			else:
 				# A normal figure is selected.
@@ -123,7 +156,7 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 				selected_figure = at
 				_get_figure(at).selected = true
 				
-				var possible_moves = _get_possible_moves()
+				var possible_moves = _get_possible_moves(selected_figure)
 				_highlight_all(possible_moves)
 
 func _toggle_active_player():
@@ -142,68 +175,68 @@ func _highlight_all(positions: Array):
 		tile_map.set_cell(1, _to_map(i), 1, Vector2i(0, 0))
 				
 
-func _get_possible_moves() -> Array:
+func _get_possible_moves(at: Vector2i) -> Array:
 	# I use simple KISS ifs for now. Should be easy to understand 
 	# and there is no need for any complicated algorithm.
 	
-	var selected: Figure = _get_figure(selected_figure)
+	var figure: Figure = _get_figure(at)
 	var result: Array = []
 	
 	# The king can move in all directions, one step only.
-	if selected.type == Figure.TYPE.king:
-		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y), result)
-		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y+1), result)
-		_check(selected, Vector2i(selected_figure.x, selected_figure.y+1), result)
-		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y+1), result)
-		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y), result)
-		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y-1), result)
-		_check(selected, Vector2i(selected_figure.x, selected_figure.y-1), result)
-		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y-1), result)
+	if figure.type == Figure.TYPE.king:
+		_check(figure, Vector2i(at.x-1, at.y), result)
+		_check(figure, Vector2i(at.x-1, at.y+1), result)
+		_check(figure, Vector2i(at.x, at.y+1), result)
+		_check(figure, Vector2i(at.x+1, at.y+1), result)
+		_check(figure, Vector2i(at.x+1, at.y), result)
+		_check(figure, Vector2i(at.x+1, at.y-1), result)
+		_check(figure, Vector2i(at.x, at.y-1), result)
+		_check(figure, Vector2i(at.x-1, at.y-1), result)
 	
 	#Moves of pawns.
-	if selected.type == Figure.TYPE.pawn:
-		if selected.color == Figure.COLOR.white && !rotate_board || selected.color == Figure.COLOR.black && rotate_board:
-			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y+1), result)
-			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y+1), result)
-			var blocked = _check_no_attack(Vector2i(selected_figure.x, selected_figure.y+1), result)
-			if selected_figure.y == 1 && !blocked:
-				_check_no_attack(Vector2i(selected_figure.x, selected_figure.y+2), result)
-		if selected.color == Figure.COLOR.black && !rotate_board || selected.color == Figure.COLOR.white && rotate_board:
-			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y-1), result)
-			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y-1), result)
-			var blocked =_check_no_attack(Vector2i(selected_figure.x, selected_figure.y-1), result)
-			if selected_figure.y == 6 && !blocked:
-				_check_no_attack(Vector2i(selected_figure.x, selected_figure.y-2), result)
+	if figure.type == Figure.TYPE.pawn:
+		if figure.color == Figure.COLOR.white && !rotate_board || figure.color == Figure.COLOR.black && rotate_board:
+			_check_only_attack(figure, Vector2i(at.x-1, at.y+1), result)
+			_check_only_attack(figure, Vector2i(at.x+1, at.y+1), result)
+			var blocked = _check_no_attack(Vector2i(at.x, at.y+1), result)
+			if at.y == 1 && !blocked:
+				_check_no_attack(Vector2i(at.x, at.y+2), result)
+		if figure.color == Figure.COLOR.black && !rotate_board || figure.color == Figure.COLOR.white && rotate_board:
+			_check_only_attack(figure, Vector2i(at.x-1, at.y-1), result)
+			_check_only_attack(figure, Vector2i(at.x+1, at.y-1), result)
+			var blocked =_check_no_attack(Vector2i(at.x, at.y-1), result)
+			if at.y == 6 && !blocked:
+				_check_no_attack(Vector2i(at.x, at.y-2), result)
 		
 	# Check all posible moves of the knight.
-	if selected.type == Figure.TYPE.knight:
-		_check(selected, Vector2i(selected_figure.x-2, selected_figure.y-1), result)
-		_check(selected, Vector2i(selected_figure.x-2, selected_figure.y+1), result)
-		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y-2), result)
-		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y+2), result)
-		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y-2), result)
-		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y+2), result)
-		_check(selected, Vector2i(selected_figure.x+2, selected_figure.y-1), result)
-		_check(selected, Vector2i(selected_figure.x+2, selected_figure.y+1), result)
+	if figure.type == Figure.TYPE.knight:
+		_check(figure, Vector2i(at.x-2, at.y-1), result)
+		_check(figure, Vector2i(at.x-2, at.y+1), result)
+		_check(figure, Vector2i(at.x-1, at.y-2), result)
+		_check(figure, Vector2i(at.x-1, at.y+2), result)
+		_check(figure, Vector2i(at.x+1, at.y-2), result)
+		_check(figure, Vector2i(at.x+1, at.y+2), result)
+		_check(figure, Vector2i(at.x+2, at.y-1), result)
+		_check(figure, Vector2i(at.x+2, at.y+1), result)
 	
 	# Check all posible moves of the bishop.
-	if selected.type == Figure.TYPE.bishop:
-		_check_all_diagonal(selected, result)
+	if figure.type == Figure.TYPE.bishop:
+		_check_all_diagonal(figure, at, result)
 
 	# Check all posible moves of the rook.
-	if selected.type == Figure.TYPE.rook:
-		_check_all_straight(selected, result)
+	if figure.type == Figure.TYPE.rook:
+		_check_all_straight(figure, at, result)
 
 	# Check all posible moves of the queen.
-	if selected.type == Figure.TYPE.queen:
-		_check_all_diagonal(selected, result)
-		_check_all_straight(selected, result)
+	if figure.type == Figure.TYPE.queen:
+		_check_all_diagonal(figure, at, result)
+		_check_all_straight(figure, at, result)
 
 	return result
 
-func _check(selected: Figure, to_check: Vector2i, result: Array) -> bool:
+func _check(figure: Figure, to_check: Vector2i, result: Array) -> bool:
 	var to_check_figure: Figure = _get_figure(to_check)
-	if to_check_figure != null && to_check_figure.color != selected.color:
+	if to_check_figure != null && to_check_figure.color != figure.color:
 		result.append(to_check)
 
 	return to_check_figure == null || to_check_figure.color != Figure.COLOR.none
@@ -217,50 +250,50 @@ func _check_no_attack(to_check: Vector2i, result: Array) -> bool:
 	return true
 
 # Same as _check but only attack is allowed.
-func _check_only_attack(selected: Figure, to_check: Vector2i, result: Array):
+func _check_only_attack(figure: Figure, to_check: Vector2i, result: Array):
 	var to_check_figure: Figure = _get_figure(to_check)
-	if to_check_figure != null && to_check_figure.color != Figure.COLOR.none && to_check_figure.color != selected.color:
+	if to_check_figure != null && to_check_figure.color != Figure.COLOR.none && to_check_figure.color != figure.color:
 		result.append(to_check)
 
 # Checks all diagonal moves.
-func _check_all_diagonal(selected: Figure, result: Array):
+func _check_all_diagonal(figure: Figure, at: Vector2i, result: Array):
 	# To top left.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x-i, selected_figure.y+i), result):
+		if _check(figure, Vector2i(at.x-i, at.y+i), result):
 			break
 
 	# To top right.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x+i, selected_figure.y+i), result):
+		if _check(figure, Vector2i(at.x+i, at.y+i), result):
 			break
 
 	# To bottom left.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x-i, selected_figure.y-i), result):
+		if _check(figure, Vector2i(at.x-i, at.y-i), result):
 			break
 
 	# To bottom right.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x+i, selected_figure.y-i), result):
+		if _check(figure, Vector2i(at.x+i, at.y-i), result):
 			break
 
-func _check_all_straight(selected: Figure, result: Array):
+func _check_all_straight(figure: Figure, at: Vector2i, result: Array):
 	# To top.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x, selected_figure.y+i), result):
+		if _check(figure, Vector2i(at.x, at.y+i), result):
 			break
 
 	# To bottom.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x, selected_figure.y-i), result):
+		if _check(figure, Vector2i(at.x, at.y-i), result):
 			break
 
 	# To left.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x-i, selected_figure.y), result):
+		if _check(figure, Vector2i(at.x-i, at.y), result):
 			break
 
 	# To right.
 	for i in range(1, 7):
-		if _check(selected, Vector2i(selected_figure.x+i, selected_figure.y), result):
+		if _check(figure, Vector2i(at.x+i, at.y), result):
 			break
