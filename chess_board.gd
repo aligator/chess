@@ -4,6 +4,8 @@
 extends Node2D
 
 @export var figure_scene: PackedScene = preload("res://Objects/figure.tscn")
+@export var rotate_board: bool = false
+
 @onready var tile_map: TileMap = $TileMap
 
 var active_player: Figure.COLOR = Figure.COLOR.white
@@ -15,7 +17,7 @@ var selected_figure: Vector2i = Vector2i(-1, -1)
 func _get_figure(at: Vector2i) -> Figure: 
 	if at.x < 0 || at.x >= 8 || at.y < 0 || at.y >= 8:
 		return null
-		
+	
 	return figures[at.x][at.y]
 
 # _setsFigure to the given state.
@@ -26,6 +28,12 @@ func _set_figure(at: Vector2i, color: Figure.COLOR, type: Figure.TYPE):
 
 func _to_map(at: Vector2i) -> Vector2i:
 	return Vector2i(at.x, 7 - at.y)
+
+func vector2i_rotate180(do_rotate: bool, x: int, y: int) -> Vector2i:
+	if do_rotate:
+		return Vector2i(7 - x, 7 - y)
+	else:
+		return Vector2i(x, y)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -46,41 +54,41 @@ func _ready():
 			figures[x].append(figure)
 			add_child(figures[x][y])
 	
-	_set_figure(Vector2i(0, 0), Figure.COLOR.white, Figure.TYPE.rook)
-	_set_figure(Vector2i(1, 0), Figure.COLOR.white, Figure.TYPE.knight)
-	_set_figure(Vector2i(2, 0), Figure.COLOR.white, Figure.TYPE.bishop)
-	_set_figure(Vector2i(3, 0), Figure.COLOR.white, Figure.TYPE.queen)
-	_set_figure(Vector2i(4, 0), Figure.COLOR.white, Figure.TYPE.king)
-	_set_figure(Vector2i(5, 0), Figure.COLOR.white, Figure.TYPE.bishop)
-	_set_figure(Vector2i(6, 0), Figure.COLOR.white, Figure.TYPE.knight)
-	_set_figure(Vector2i(7, 0), Figure.COLOR.white, Figure.TYPE.rook)
+	_set_figure(vector2i_rotate180(rotate_board, 0, 0), Figure.COLOR.white, Figure.TYPE.rook)
+	_set_figure(vector2i_rotate180(rotate_board, 1, 0), Figure.COLOR.white, Figure.TYPE.knight)
+	_set_figure(vector2i_rotate180(rotate_board, 2, 0), Figure.COLOR.white, Figure.TYPE.bishop)
+	_set_figure(vector2i_rotate180(rotate_board, 3, 0), Figure.COLOR.white, Figure.TYPE.queen)
+	_set_figure(vector2i_rotate180(rotate_board, 4, 0), Figure.COLOR.white, Figure.TYPE.king)
+	_set_figure(vector2i_rotate180(rotate_board, 5, 0), Figure.COLOR.white, Figure.TYPE.bishop)
+	_set_figure(vector2i_rotate180(rotate_board, 6, 0), Figure.COLOR.white, Figure.TYPE.knight)
+	_set_figure(vector2i_rotate180(rotate_board, 7, 0), Figure.COLOR.white, Figure.TYPE.rook)
 	
-	_set_figure(Vector2i(0, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(Vector2i(1, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(Vector2i(2, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(Vector2i(3, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(Vector2i(4, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(Vector2i(5, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(Vector2i(6, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(Vector2i(7, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 0, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 1, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 2, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 3, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 4, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 5, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 6, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 7, 1), Figure.COLOR.white, Figure.TYPE.pawn)
 	
-	_set_figure(Vector2i(0, 7), Figure.COLOR.black, Figure.TYPE.rook)
-	_set_figure(Vector2i(1, 7), Figure.COLOR.black, Figure.TYPE.knight)
-	_set_figure(Vector2i(2, 7), Figure.COLOR.black, Figure.TYPE.bishop)
-	_set_figure(Vector2i(3, 7), Figure.COLOR.black, Figure.TYPE.queen)
-	_set_figure(Vector2i(4, 7), Figure.COLOR.black, Figure.TYPE.king)
-	_set_figure(Vector2i(5, 7), Figure.COLOR.black, Figure.TYPE.bishop)
-	_set_figure(Vector2i(6, 7), Figure.COLOR.black, Figure.TYPE.knight)
-	_set_figure(Vector2i(7, 7), Figure.COLOR.black, Figure.TYPE.rook)
+	_set_figure(vector2i_rotate180(rotate_board, 0, 7), Figure.COLOR.black, Figure.TYPE.rook)
+	_set_figure(vector2i_rotate180(rotate_board, 1, 7), Figure.COLOR.black, Figure.TYPE.knight)
+	_set_figure(vector2i_rotate180(rotate_board, 2, 7), Figure.COLOR.black, Figure.TYPE.bishop)
+	_set_figure(vector2i_rotate180(rotate_board, 3, 7), Figure.COLOR.black, Figure.TYPE.queen)
+	_set_figure(vector2i_rotate180(rotate_board, 4, 7), Figure.COLOR.black, Figure.TYPE.king)
+	_set_figure(vector2i_rotate180(rotate_board, 5, 7), Figure.COLOR.black, Figure.TYPE.bishop)
+	_set_figure(vector2i_rotate180(rotate_board, 6, 7), Figure.COLOR.black, Figure.TYPE.knight)
+	_set_figure(vector2i_rotate180(rotate_board, 7, 7), Figure.COLOR.black, Figure.TYPE.rook)
 	
-	_set_figure(Vector2i(0, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(Vector2i(1, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(Vector2i(2, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(Vector2i(3, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(Vector2i(4, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(Vector2i(5, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(Vector2i(6, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(Vector2i(7, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 0, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 1, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 2, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 3, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 4, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 5, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 6, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(vector2i_rotate180(rotate_board, 7, 6), Figure.COLOR.black, Figure.TYPE.pawn)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
@@ -154,17 +162,17 @@ func _get_possible_moves() -> Array:
 	
 	#Moves of pawns.
 	if selected.type == Figure.TYPE.pawn:
-		if selected.color == Figure.COLOR.white:
+		if selected.color == Figure.COLOR.white && !rotate_board || selected.color == Figure.COLOR.black && rotate_board:
 			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y+1), result)
 			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y+1), result)
-			_check_no_attack(Vector2i(selected_figure.x, selected_figure.y+1), result)
-			if selected_figure.y == 1:
+			var blocked = _check_no_attack(Vector2i(selected_figure.x, selected_figure.y+1), result)
+			if selected_figure.y == 1 && !blocked:
 				_check_no_attack(Vector2i(selected_figure.x, selected_figure.y+2), result)
-		if selected.color == Figure.COLOR.black:
+		if selected.color == Figure.COLOR.black && !rotate_board || selected.color == Figure.COLOR.white && rotate_board:
 			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y-1), result)
 			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y-1), result)
-			_check_no_attack(Vector2i(selected_figure.x, selected_figure.y-1), result)
-			if selected_figure.y == 6:
+			var blocked =_check_no_attack(Vector2i(selected_figure.x, selected_figure.y-1), result)
+			if selected_figure.y == 6 && !blocked:
 				_check_no_attack(Vector2i(selected_figure.x, selected_figure.y-2), result)
 		
 	# Check all posible moves of the knight.
@@ -201,10 +209,12 @@ func _check(selected: Figure, to_check: Vector2i, result: Array) -> bool:
 	return to_check_figure == null || to_check_figure.color != Figure.COLOR.none
 
 # Same as _check but attack is not allowed.
-func _check_no_attack(to_check: Vector2i, result: Array):
+func _check_no_attack(to_check: Vector2i, result: Array) -> bool:
 	var to_check_figure: Figure = _get_figure(to_check)
 	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none:
 		result.append(to_check)
+		return false
+	return true
 
 # Same as _check but only attack is allowed.
 func _check_only_attack(selected: Figure, to_check: Vector2i, result: Array):
