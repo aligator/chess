@@ -32,14 +32,14 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	visible = true
+	animation_sprite.visible = true
 	
 	if color == COLOR.white:
 		animation_sprite.animation = "white"
 	elif color == COLOR.black:
 		animation_sprite.animation = "black"
 	else:
-		visible = false
+		animation_sprite.visible = false
 		
 	animation_sprite.set_frame_and_progress(type, 1)
 	

@@ -4,8 +4,9 @@
 extends Node2D
 
 @export var figure_scene: PackedScene = preload("res://Objects/figure.tscn")
+@onready var tile_map: TileMap = $TileMap
 
-@onready var tile_map = $TileMap
+var active_player: Figure.COLOR = Figure.COLOR.white
 
 var figures: Array = []
 
@@ -88,16 +89,46 @@ func _process(_delta):
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: Vector2i):
 	if event is InputEventMouseButton:
 		if event.pressed && selected_figure != at:
-			if _get_figure(selected_figure) != null:
-				_get_figure(selected_figure).selected = false
-			selected_figure = at
-			_get_figure(at).selected = true
+			var event_figure = _get_figure(at)
+
+			if event_figure == null:
+				return
 			
-			var possible_moves = _get_possible_moves()
-			_highlight_all(possible_moves)
+			if event_figure.color == Figure.COLOR.none || event_figure.color != active_player:
+				# A NONE fiugre is selected.
+				# If it is a valid move -> e.g. the field is highlited, then just make the move.
+				var tile: TileData = tile_map.get_cell_tile_data(1, _to_map(at))
+				# If the tile exists in that layer, it is highlighted.
+				if tile != null:
+					var selected = _get_figure(selected_figure)
+					_set_figure(at, selected.color, selected.type)
+					_set_figure(selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
+					selected.selected = false
+					_highlight_clear()
+					selected_figure = Vector2i(-1, -1)
+					_toggle_active_player()
+				return
+			else:
+				# A normal figure is selected.
+				if _get_figure(selected_figure) != null:
+					_get_figure(selected_figure).selected = false
+				selected_figure = at
+				_get_figure(at).selected = true
+				
+				var possible_moves = _get_possible_moves()
+				_highlight_all(possible_moves)
+
+func _toggle_active_player():
+	if active_player == Figure.COLOR.white:
+		active_player = Figure.COLOR.black
+	else:
+		active_player = Figure.COLOR.white
+
+func _highlight_clear():
+	tile_map.clear_layer(1)
 
 func _highlight_all(positions: Array):
-	tile_map.clear_layer(1)
+	_highlight_clear()
 	
 	for i in positions:
 		tile_map.set_cell(1, _to_map(i), 1, Vector2i(0, 0))
@@ -124,14 +155,14 @@ func _get_possible_moves() -> Array:
 	#Moves of pawns.
 	if selected.type == Figure.TYPE.pawn:
 		if selected.color == Figure.COLOR.white:
-			_check_only_attack(Vector2i(selected_figure.x-1, selected_figure.y+1), result)
-			_check_only_attack(Vector2i(selected_figure.x+1, selected_figure.y+1), result)
+			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y+1), result)
+			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y+1), result)
 			_check_no_attack(Vector2i(selected_figure.x, selected_figure.y+1), result)
 			if selected_figure.y == 1:
 				_check_no_attack(Vector2i(selected_figure.x, selected_figure.y+2), result)
 		if selected.color == Figure.COLOR.black:
-			_check_only_attack(Vector2i(selected_figure.x-1, selected_figure.y-1), result)
-			_check_only_attack(Vector2i(selected_figure.x+1, selected_figure.y-1), result)
+			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y-1), result)
+			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y-1), result)
 			_check_no_attack(Vector2i(selected_figure.x, selected_figure.y-1), result)
 			if selected_figure.y == 6:
 				_check_no_attack(Vector2i(selected_figure.x, selected_figure.y-2), result)
@@ -176,9 +207,9 @@ func _check_no_attack(to_check: Vector2i, result: Array):
 		result.append(to_check)
 
 # Same as _check but only attack is allowed.
-func _check_only_attack(to_check: Vector2i, result: Array):
+func _check_only_attack(selected: Figure, to_check: Vector2i, result: Array):
 	var to_check_figure: Figure = _get_figure(to_check)
-	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none && to_check_figure.color != Figure.COLOR.none:
+	if to_check_figure != null && to_check_figure.color != Figure.COLOR.none && to_check_figure.color != selected.color:
 		result.append(to_check)
 
 # Checks all diagonal moves.
