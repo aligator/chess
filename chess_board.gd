@@ -120,10 +120,37 @@ func _get_possible_moves() -> Array:
 		_check(selected, Vector2i(selected_figure.x+1, selected_figure.y-1), result)
 		_check(selected, Vector2i(selected_figure.x, selected_figure.y-1), result)
 		_check(selected, Vector2i(selected_figure.x-1, selected_figure.y-1), result)
-			
+	
+	#Moves of pawns.
+	if selected.type == Figure.TYPE.pawn:
+		if selected.color == Figure.COLOR.white:
+			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y+1), result)
+			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y+1), result)
+			_check_no_attack(selected, Vector2i(selected_figure.x, selected_figure.y+1), result)
+			if selected_figure.y == 1:
+				_check_no_attack(selected, Vector2i(selected_figure.x, selected_figure.y+2), result)
+		if selected.color == Figure.COLOR.black:
+			_check_only_attack(selected, Vector2i(selected_figure.x-1, selected_figure.y-1), result)
+			_check_only_attack(selected, Vector2i(selected_figure.x+1, selected_figure.y-1), result)
+			_check_no_attack(selected, Vector2i(selected_figure.x, selected_figure.y-1), result)
+			if selected_figure.y == 6:
+				_check_no_attack(selected, Vector2i(selected_figure.x, selected_figure.y-2), result)
+		
 	return result
 
 func _check(selected: Figure, to_check: Vector2i, result: Array):
 	var to_check_figure: Figure = _get_figure(to_check)
 	if to_check_figure != null && to_check_figure.color != selected.color:
+		result.append(to_check)
+
+# Same as _check but attack is not allowed.
+func _check_no_attack(selected: Figure, to_check: Vector2i, result: Array):
+	var to_check_figure: Figure = _get_figure(to_check)
+	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none:
+		result.append(to_check)
+
+# Same as _check but only attack is allowed.
+func _check_only_attack(selected: Figure, to_check: Vector2i, result: Array):
+	var to_check_figure: Figure = _get_figure(to_check)
+	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none && to_check_figure.color != Figure.COLOR.none:
 		result.append(to_check)
