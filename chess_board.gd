@@ -286,14 +286,19 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 							if selected_figure.x == 7:
 								_black_can_castle_kingside = false
 
-					# Set en passant if a pawn is moved two fields.
-					# Or reset the en passant if it was only moved one field.
 					if selected.type == Figure.TYPE.pawn:
+						# Set en passant if a pawn is moved two fields.
+						# Or reset the en passant if it was only moved one field.
 						if at.y == selected_figure.y + 2 || at.y == selected_figure.y - 2:
 							_en_passant = selected_figure.x
 						else:
 							_en_passant = -1
 
+						# If a pawn is moved to the last row, then it is promoted.
+						if at.y == 0 || at.y == 7:
+							# TODO: Implement a way to select the figure type.
+							selected.type = Figure.TYPE.queen
+							
 					_set_figure(at, selected.color, selected.type)
 					_set_figure(selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
 
