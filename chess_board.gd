@@ -5,6 +5,7 @@ extends Node2D
 
 @export var figure_scene: PackedScene = preload("res://Objects/figure.tscn")
 @export var rotate_board: bool = false
+@export var debug_moves: bool = false
 
 @onready var tile_map: TileMap = $TileMap
 
@@ -16,7 +17,7 @@ var selected_figure: Vector2i = Vector2i(-1, -1)
 
 var king_in_danger = false
 
-var king_white = Vector2i(0, 0)
+var checkmate = false
 
 func _get_figure(at: Vector2i) -> Figure: 
 	return _get_figure_in(figures, at)
@@ -83,7 +84,7 @@ func _ready():
 	_set_figure(vector2i_rotate180(rotate_board, 5, 1), Figure.COLOR.white, Figure.TYPE.pawn)
 	_set_figure(vector2i_rotate180(rotate_board, 6, 1), Figure.COLOR.white, Figure.TYPE.pawn)
 	_set_figure(vector2i_rotate180(rotate_board, 7, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	
+
 	_set_figure(vector2i_rotate180(rotate_board, 0, 7), Figure.COLOR.black, Figure.TYPE.rook)
 	_set_figure(vector2i_rotate180(rotate_board, 1, 7), Figure.COLOR.black, Figure.TYPE.knight)
 	_set_figure(vector2i_rotate180(rotate_board, 2, 7), Figure.COLOR.black, Figure.TYPE.bishop)
@@ -149,6 +150,22 @@ func _free_board(board: Array):
 			board[x][y].free()
 		board[x].clear()
 	board.clear()
+	
+func _filter_illegal_moves(possible_moves: Array, source: Vector2i):
+	# Filter all moves that would put the king in danger.
+	for move in possible_moves.duplicate(): # (duplicate is needed because otherwise the array is modified while iterating over it)
+		var board_copy = _clone_figures()
+		var source_figure = _get_figure_in(board_copy, source)
+		if source_figure != null:
+			_set_figure_in(board_copy, move, source_figure.color,source_figure.type)
+			_set_figure_in(board_copy, source, Figure.COLOR.none, Figure.TYPE.pawn)
+			var king = _find_current_king(board_copy)
+			if king == null:
+				possible_moves.erase(move)
+			else:
+				if _check_king_in_danger(board_copy, king):
+					possible_moves.erase(move)
+		_free_board(board_copy)
 
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: Vector2i):
 	if event is InputEventMouseButton:
@@ -174,10 +191,12 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 					
 					# Check if the current players king is in danger.
 					var king = _find_current_king(figures)
+					king_in_danger = false
 					if king == null:
 						print("no king exists")
 					else:
 						king_in_danger = _check_king_in_danger(figures, king)
+					
 				return
 			else:
 				# An own figure is selected.
@@ -188,20 +207,8 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 				_get_figure(at).selected = true
 				
 				var possible_moves = _get_possible_moves(figures, selected_figure)
-				# Filter all moves that would put the king in danger.
-				for move in possible_moves.duplicate(): # (duplicate is needed because otherwise the array is modified while iterating over it)
-					var board_copy = _clone_figures()
-					var source_figure = _get_figure_in(board_copy, selected_figure)
-					_set_figure_in(board_copy, move, source_figure.color,source_figure.type)
-					_set_figure_in(board_copy, selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
-					var king = _find_current_king(board_copy)
-					if king == null:
-						possible_moves.erase(move)
-					else:
-						if _check_king_in_danger(board_copy, king):
-							possible_moves.erase(move)
-					_free_board(board_copy)
-							
+				if !debug_moves:
+					_filter_illegal_moves(possible_moves, selected_figure)
 				_highlight_all(possible_moves)
 
 func _toggle_active_player():
