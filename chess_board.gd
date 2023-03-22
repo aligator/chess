@@ -25,6 +25,8 @@ var _white_can_castle_queenside = true
 var _black_can_castle_kingside = true
 var _black_can_castle_queenside = true
 
+# The en passant is the row where a pawn can be captured in the next move.
+var _en_passant: int = -1
 
 func _get_figure(at: Vector2i) -> Figure: 
 	return _get_figure_in(figures, at)
@@ -284,6 +286,14 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 							if selected_figure.x == 7:
 								_black_can_castle_kingside = false
 
+					# Set en passant if a pawn is moved two fields.
+					# Or reset the en passant if it was only moved one field.
+					if selected.type == Figure.TYPE.pawn:
+						if at.y == selected_figure.y + 2 || at.y == selected_figure.y - 2:
+							_en_passant = selected_figure.x
+						else:
+							_en_passant = -1
+
 					_set_figure(at, selected.color, selected.type)
 					_set_figure(selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
 
@@ -349,18 +359,23 @@ func _get_possible_moves(board: Array, at: Vector2i) -> Array:
 		_check(board, figure, Vector2i(at.x+1, at.y-1), result)
 		_check(board, figure, Vector2i(at.x, at.y-1), result)
 		_check(board, figure, Vector2i(at.x-1, at.y-1), result)
+
+		if _can_do_castle(board, at, Vector2i(0, at.y)):
+			result.append(Vector2i(6, at.y))
+		if _can_do_castle(board, at, Vector2i(7, at.y)):
+			result.append(Vector2i(2, at.y))
 	
 	#Moves of pawns.
 	if figure.type == Figure.TYPE.pawn:
 		if figure.color == Figure.COLOR.white && !rotate_board || figure.color == Figure.COLOR.black && rotate_board:
-			_check_only_attack(board, figure, Vector2i(at.x-1, at.y+1), result)
-			_check_only_attack(board, figure, Vector2i(at.x+1, at.y+1), result)
+			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x-1, at.y+1), result)
+			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x+1, at.y+1), result)
 			var blocked = _check_no_attack(board, Vector2i(at.x, at.y+1), result)
 			if at.y == 1 && !blocked:
 				_check_no_attack(board, Vector2i(at.x, at.y+2), result)
 		if figure.color == Figure.COLOR.black && !rotate_board || figure.color == Figure.COLOR.white && rotate_board:
-			_check_only_attack(board, figure, Vector2i(at.x-1, at.y-1), result)
-			_check_only_attack(board, figure, Vector2i(at.x+1, at.y-1), result)
+			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x-1, at.y-1), result)
+			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x+1, at.y-1), result)
 			var blocked =_check_no_attack(board, Vector2i(at.x, at.y-1), result)
 			if at.y == 6 && !blocked:
 				_check_no_attack(board, Vector2i(at.x, at.y-2), result)
@@ -389,12 +404,6 @@ func _get_possible_moves(board: Array, at: Vector2i) -> Array:
 		_check_all_diagonal(board, figure, at, result)
 		_check_all_straight(board, figure, at, result)
 
-	if figure.type == Figure.TYPE.king && _can_do_castle(board, at, Vector2i(0, at.y)):
-		result.append(Vector2i(6, at.y))
-
-	if figure.type == Figure.TYPE.king && _can_do_castle(board, at, Vector2i(7, at.y)):
-		result.append(Vector2i(2, at.y))
-
 	return result
 
 func _check(board: Array, figure: Figure, to_check: Vector2i, result: Array) -> bool:
@@ -413,9 +422,12 @@ func _check_no_attack(board: Array, to_check: Vector2i, result: Array) -> bool:
 	return true
 
 # Same as _check but only attack is allowed.
-func _check_only_attack(board: Array, figure: Figure, to_check: Vector2i, result: Array):
+# However, en passant is also allowed.
+func _check_only_attack_or_en_passant(board: Array, figure: Figure, to_check: Vector2i, result: Array):
 	var to_check_figure: Figure = _get_figure_in(board, to_check)
 	if to_check_figure != null && to_check_figure.color != Figure.COLOR.none && to_check_figure.color != figure.color:
+		result.append(to_check)
+	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none && to_check.x == _en_passant:
 		result.append(to_check)
 
 # Checks all diagonal moves.
