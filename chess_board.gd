@@ -167,6 +167,19 @@ func _filter_illegal_moves(possible_moves: Array, source: Vector2i):
 					possible_moves.erase(move)
 		_free_board(board_copy)
 
+func _is_checkmate():
+	# For every own figure, check if there is any possible move which would not put the king in danger.
+	# If there is no such move, then it is checkmate.
+	for x in range(8):
+		for y in range(8):
+			var figure = _get_figure(Vector2i(x, y))
+			if figure.color == active_player:
+				var possible_moves = _get_possible_moves(figures, Vector2i(x, y))
+				_filter_illegal_moves(possible_moves, Vector2i(x, y))
+				if possible_moves.size() > 0:
+					return false
+	return true
+
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: Vector2i):
 	if event is InputEventMouseButton:
 		if event.pressed && selected_figure != at:
@@ -197,6 +210,8 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 					else:
 						king_in_danger = _check_king_in_danger(figures, king)
 					
+					if king_in_danger:
+						checkmate = _is_checkmate()
 				return
 			else:
 				# An own figure is selected.
