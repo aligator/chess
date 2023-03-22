@@ -267,10 +267,10 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 							_black_can_castle_queenside = false
 						
 						# Also do the castling if the king is moved	two fields.
-						if at.x == 6:
+						if at.x == 6 && (selected.color == Figure.COLOR.white && _white_can_castle_kingside || selected.color == Figure.COLOR.black && _black_can_castle_kingside):
 							_set_figure(Vector2i(7, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
 							_set_figure(Vector2i(5, at.y), selected.color, Figure.TYPE.rook)
-						if at.x == 2:
+						if at.x == 2 && (selected.color == Figure.COLOR.white && _white_can_castle_queenside || selected.color == Figure.COLOR.black && _black_can_castle_queenside):
 							_set_figure(Vector2i(0, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
 							_set_figure(Vector2i(3, at.y), selected.color, Figure.TYPE.rook)
 							
