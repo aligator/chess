@@ -18,6 +18,13 @@ var selected_figure: Vector2i = Vector2i(-1, -1)
 var king_in_danger = false
 
 var checkmate = false
+var stalemate = false
+
+var _white_can_castle_kingside = true
+var _white_can_castle_queenside = true
+var _black_can_castle_kingside = true
+var _black_can_castle_queenside = true
+
 
 func _get_figure(at: Vector2i) -> Figure: 
 	return _get_figure_in(figures, at)
@@ -167,17 +174,69 @@ func _filter_illegal_moves(possible_moves: Array, source: Vector2i):
 					possible_moves.erase(move)
 		_free_board(board_copy)
 
-func _is_checkmate():
-	# For every own figure, check if there is any possible move which would not put the king in danger.
-	# If there is no such move, then it is checkmate.
+func _check_checkmate_stalemate():
+	var is_checkmate = true
+	var is_stalemate = true
+	
 	for x in range(8):
 		for y in range(8):
 			var figure = _get_figure(Vector2i(x, y))
 			if figure.color == active_player:
 				var possible_moves = _get_possible_moves(figures, Vector2i(x, y))
+				
+				# For every own figure, check if there is any possible move.
+				# If there is no such move, then it is stalemate.
+				if possible_moves.size() > 0:
+					is_stalemate = false
+					
+				# For every own figure, check if there is any possible move which would not put the king in danger.
+				# If there is no such move, then it is checkmate.
 				_filter_illegal_moves(possible_moves, Vector2i(x, y))
 				if possible_moves.size() > 0:
-					return false
+					is_checkmate = false
+
+	checkmate = is_checkmate
+	stalemate = is_stalemate
+
+func _can_do_castle(board: Array, source: Vector2i, target: Vector2i) -> bool:
+	var source_figure = _get_figure_in(board, source)
+	var target_figure = _get_figure_in(board, target)
+	
+	if source_figure == null || target_figure == null:
+		return false
+	
+	if source_figure.color != active_player || target_figure.color != active_player:
+		return false
+	
+	if source_figure.type != Figure.TYPE.king || target_figure.type != Figure.TYPE.rook:
+		return false
+	
+	var direction = target.x - source.x
+	if direction > 0:
+		direction = -1
+	else:
+		direction = 1
+
+	if active_player == Figure.COLOR.white:
+		if direction == 1 && !_white_can_castle_kingside:
+			return false
+		if direction == -1 && !_white_can_castle_queenside:
+			return false
+	else:
+		if direction == 1 && !_black_can_castle_kingside:
+			return false
+		if direction == -1 && !_black_can_castle_queenside:
+			return false
+		
+	var x = source.x + direction
+	while x != target.x:
+		if x == 0 || x == 7:
+			break
+		var figure = _get_figure_in(board, Vector2i(x, source.y))
+		if figure.color != Figure.COLOR.none:
+			return false
+		x += direction
+	
 	return true
 
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: Vector2i):
@@ -195,8 +254,39 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 				# If the tile exists in that layer, it is highlighted.
 				if tile != null:
 					var selected = _get_figure(selected_figure)
+
+					# Set castling to false if the king or a rook is moved.
+					if selected.type == Figure.TYPE.king:
+						if active_player == Figure.COLOR.white:
+							_white_can_castle_kingside = false
+							_white_can_castle_queenside = false	
+						if active_player == Figure.COLOR.black:
+							_black_can_castle_kingside = false
+							_black_can_castle_queenside = false
+						
+						# Also do the castling if the king is moved	two fields.
+						if at.x == 6:
+							_set_figure(Vector2i(7, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
+							_set_figure(Vector2i(5, at.y), selected.color, Figure.TYPE.rook)
+						if at.x == 2:
+							_set_figure(Vector2i(0, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
+							_set_figure(Vector2i(3, at.y), selected.color, Figure.TYPE.rook)
+							
+					if selected.type == Figure.TYPE.rook:
+						if active_player == Figure.COLOR.white:
+							if selected_figure.x == 0:
+								_white_can_castle_queenside = false
+							if selected_figure.x == 7:
+								_white_can_castle_kingside = false
+						if active_player == Figure.COLOR.black:
+							if selected_figure.x == 0:
+								_black_can_castle_queenside = false
+							if selected_figure.x == 7:
+								_black_can_castle_kingside = false
+
 					_set_figure(at, selected.color, selected.type)
 					_set_figure(selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
+
 					selected.selected = false
 					_highlight_clear()
 					selected_figure = Vector2i(-1, -1)
@@ -211,7 +301,7 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 						king_in_danger = _check_king_in_danger(figures, king)
 					
 					if king_in_danger:
-						checkmate = _is_checkmate()
+						_check_checkmate_stalemate()
 				return
 			else:
 				# An own figure is selected.
@@ -298,6 +388,12 @@ func _get_possible_moves(board: Array, at: Vector2i) -> Array:
 	if figure.type == Figure.TYPE.queen:
 		_check_all_diagonal(board, figure, at, result)
 		_check_all_straight(board, figure, at, result)
+
+	if figure.type == Figure.TYPE.king && _can_do_castle(board, at, Vector2i(0, at.y)):
+		result.append(Vector2i(6, at.y))
+
+	if figure.type == Figure.TYPE.king && _can_do_castle(board, at, Vector2i(7, at.y)):
+		result.append(Vector2i(2, at.y))
 
 	return result
 
