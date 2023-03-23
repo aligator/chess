@@ -18,10 +18,11 @@ sources/0 = SubResource("TileSetAtlasSource_4hg6k")
 sources/1 = SubResource("TileSetAtlasSource_wa2hw")
 
 [node name="ChessBoard" type="Node2D"]
+position = Vector2(80, 80)
 script = ExtResource("1_1iw3g")
 
 [node name="TileMap" type="TileMap" parent="."]
-position = Vector2(16, 16)
+position = Vector2(-64, -64)
 tile_set = SubResource("TileSet_vu2p3")
 format = 2
 layer_0/name = "Board"

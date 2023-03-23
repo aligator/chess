@@ -4,10 +4,12 @@
 extends Node2D
 
 @export var figure_scene: PackedScene = preload("res://Objects/figure.tscn")
-@export var rotate_board: bool = false
 @export var debug_moves: bool = false
+@export var rotate_board_after_move: bool = true
+@export var is_board_rotated: bool = false
 
 @onready var tile_map: TileMap = $TileMap
+
 
 var active_player: Figure.COLOR = Figure.COLOR.white
 
@@ -25,8 +27,8 @@ var _white_can_castle_queenside = true
 var _black_can_castle_kingside = true
 var _black_can_castle_queenside = true
 
-# The en passant is the row where a pawn can be captured in the next move.
-var _en_passant: int = -1
+# The en passant is the position where a pawn can be captured in the next move.
+var _en_passant: Vector2i = Vector2i(-1, -1)
 
 func _get_figure(at: Vector2i) -> Figure: 
 	return _get_figure_in(figures, at)
@@ -50,8 +52,12 @@ func _set_figure_in(board: Array, at: Vector2i, color: Figure.COLOR, type: Figur
 
 func _to_map(at: Vector2i) -> Vector2i:
 	return Vector2i(at.x, 7 - at.y)
+func _to_global(at: Vector2i) -> Vector2:
+	var tile_size = tile_map.tile_set.tile_size
+	var offset: Vector2 = tile_map.position + Vector2(tile_size / 2)
+	return (Vector2(_to_map(at)) * Vector2(tile_size)) + offset
 
-func vector2i_rotate180(do_rotate: bool, x: int, y: int) -> Vector2i:
+func _vector2i_rotate180(do_rotate: bool, x: int, y: int) -> Vector2i:
 	if do_rotate:
 		return Vector2i(7 - x, 7 - y)
 	else:
@@ -60,7 +66,7 @@ func vector2i_rotate180(do_rotate: bool, x: int, y: int) -> Vector2i:
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var tile_size = tile_map.tile_set.tile_size
-	var offset: Vector2 = tile_map.position + Vector2(tile_size / 2)	
+	var offset: Vector2 = tile_map.position + Vector2(tile_size / 2)
 	
 	# Fill the board with the starting setup.
 	for x in 8:
@@ -76,41 +82,58 @@ func _ready():
 			figures[x].append(figure)
 			add_child(figures[x][y])
 	
-	_set_figure(vector2i_rotate180(rotate_board, 0, 0), Figure.COLOR.white, Figure.TYPE.rook)
-	_set_figure(vector2i_rotate180(rotate_board, 1, 0), Figure.COLOR.white, Figure.TYPE.knight)
-	_set_figure(vector2i_rotate180(rotate_board, 2, 0), Figure.COLOR.white, Figure.TYPE.bishop)
-	_set_figure(vector2i_rotate180(rotate_board, 3, 0), Figure.COLOR.white, Figure.TYPE.queen)
-	_set_figure(vector2i_rotate180(rotate_board, 4, 0), Figure.COLOR.white, Figure.TYPE.king)
-	_set_figure(vector2i_rotate180(rotate_board, 5, 0), Figure.COLOR.white, Figure.TYPE.bishop)
-	_set_figure(vector2i_rotate180(rotate_board, 6, 0), Figure.COLOR.white, Figure.TYPE.knight)
-	_set_figure(vector2i_rotate180(rotate_board, 7, 0), Figure.COLOR.white, Figure.TYPE.rook)
-	
-	_set_figure(vector2i_rotate180(rotate_board, 0, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 1, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 2, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 3, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 4, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 5, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 6, 1), Figure.COLOR.white, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 7, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_reset_board()
 
-	_set_figure(vector2i_rotate180(rotate_board, 0, 7), Figure.COLOR.black, Figure.TYPE.rook)
-	_set_figure(vector2i_rotate180(rotate_board, 1, 7), Figure.COLOR.black, Figure.TYPE.knight)
-	_set_figure(vector2i_rotate180(rotate_board, 2, 7), Figure.COLOR.black, Figure.TYPE.bishop)
-	_set_figure(vector2i_rotate180(rotate_board, 3, 7), Figure.COLOR.black, Figure.TYPE.queen)
-	_set_figure(vector2i_rotate180(rotate_board, 4, 7), Figure.COLOR.black, Figure.TYPE.king)
-	_set_figure(vector2i_rotate180(rotate_board, 5, 7), Figure.COLOR.black, Figure.TYPE.bishop)
-	_set_figure(vector2i_rotate180(rotate_board, 6, 7), Figure.COLOR.black, Figure.TYPE.knight)
-	_set_figure(vector2i_rotate180(rotate_board, 7, 7), Figure.COLOR.black, Figure.TYPE.rook)
+func _reset_board():
+	_highlight_clear()
+		
+	selected_figure = Vector2i(-1, -1)
 	
-	_set_figure(vector2i_rotate180(rotate_board, 0, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 1, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 2, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 3, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 4, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 5, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 6, 6), Figure.COLOR.black, Figure.TYPE.pawn)
-	_set_figure(vector2i_rotate180(rotate_board, 7, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	king_in_danger = false
+	
+	checkmate = false
+	stalemate = false
+	
+	_white_can_castle_kingside = true
+	_white_can_castle_queenside = true
+	_black_can_castle_kingside = true
+	_black_can_castle_queenside = true
+
+	_set_figure(_vector2i_rotate180(is_board_rotated, 0, 0), Figure.COLOR.white, Figure.TYPE.rook)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 1, 0), Figure.COLOR.white, Figure.TYPE.knight)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 2, 0), Figure.COLOR.white, Figure.TYPE.bishop)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 3, 0), Figure.COLOR.white, Figure.TYPE.queen)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 4, 0), Figure.COLOR.white, Figure.TYPE.king)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 5, 0), Figure.COLOR.white, Figure.TYPE.bishop)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 6, 0), Figure.COLOR.white, Figure.TYPE.knight)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 7, 0), Figure.COLOR.white, Figure.TYPE.rook)
+	
+	_set_figure(_vector2i_rotate180(is_board_rotated, 0, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 1, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 2, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 3, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 4, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 5, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 6, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 7, 1), Figure.COLOR.white, Figure.TYPE.pawn)
+
+	_set_figure(_vector2i_rotate180(is_board_rotated, 0, 7), Figure.COLOR.black, Figure.TYPE.rook)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 1, 7), Figure.COLOR.black, Figure.TYPE.knight)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 2, 7), Figure.COLOR.black, Figure.TYPE.bishop)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 3, 7), Figure.COLOR.black, Figure.TYPE.queen)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 4, 7), Figure.COLOR.black, Figure.TYPE.king)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 5, 7), Figure.COLOR.black, Figure.TYPE.bishop)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 6, 7), Figure.COLOR.black, Figure.TYPE.knight)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 7, 7), Figure.COLOR.black, Figure.TYPE.rook)
+	
+	_set_figure(_vector2i_rotate180(is_board_rotated, 0, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 1, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 2, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 3, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 4, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 5, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 6, 6), Figure.COLOR.black, Figure.TYPE.pawn)
+	_set_figure(_vector2i_rotate180(is_board_rotated, 7, 6), Figure.COLOR.black, Figure.TYPE.pawn)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
@@ -215,19 +238,19 @@ func _can_do_castle(board: Array, source: Vector2i, target: Vector2i) -> bool:
 	
 	var direction = target.x - source.x
 	if direction > 0:
-		direction = -1
-	else:
 		direction = 1
+	else:
+		direction = -1
 
 	if active_player == Figure.COLOR.white:
-		if direction == 1 && !_white_can_castle_kingside:
+		if direction == 1 && !(!is_board_rotated && _white_can_castle_kingside || is_board_rotated && _white_can_castle_queenside):
 			return false
-		if direction == -1 && !_white_can_castle_queenside:
+		if direction == -1 && !(!is_board_rotated && _white_can_castle_queenside || is_board_rotated && _white_can_castle_kingside):
 			return false
 	else:
-		if direction == 1 && !_black_can_castle_kingside:
+		if direction == 1 && !(!is_board_rotated && _black_can_castle_kingside || is_board_rotated && _black_can_castle_queenside):
 			return false
-		if direction == -1 && !_black_can_castle_queenside:
+		if direction == -1 && !(!is_board_rotated && _black_can_castle_queenside || is_board_rotated && _black_can_castle_kingside):
 			return false
 		
 	var x = source.x + direction
@@ -259,6 +282,20 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 
 					# Set castling to false if the king or a rook is moved.
 					if selected.type == Figure.TYPE.king:
+						# Also do the castling if the king is moved	two fields.
+						if at.x == 6 && !is_board_rotated && (selected.color == Figure.COLOR.white && _white_can_castle_kingside || selected.color == Figure.COLOR.black && _black_can_castle_kingside):
+							_set_figure(Vector2i(7, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
+							_set_figure(Vector2i(5, at.y), selected.color, Figure.TYPE.rook)
+						elif at.x == 5 && is_board_rotated && (selected.color == Figure.COLOR.white && _white_can_castle_queenside || selected.color == Figure.COLOR.black && _black_can_castle_queenside):
+							_set_figure(Vector2i(7, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
+							_set_figure(Vector2i(4, at.y), selected.color, Figure.TYPE.rook)
+						elif at.x == 2 && !is_board_rotated && (selected.color == Figure.COLOR.white && _white_can_castle_queenside || selected.color == Figure.COLOR.black && _black_can_castle_queenside):
+							_set_figure(Vector2i(0, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
+							_set_figure(Vector2i(3, at.y), selected.color, Figure.TYPE.rook)
+						elif at.x == 1 && is_board_rotated && (selected.color == Figure.COLOR.white && _white_can_castle_kingside || selected.color == Figure.COLOR.black && _black_can_castle_kingside):
+							_set_figure(Vector2i(0, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
+							_set_figure(Vector2i(2, at.y), selected.color, Figure.TYPE.rook)
+							
 						if active_player == Figure.COLOR.white:
 							_white_can_castle_kingside = false
 							_white_can_castle_queenside = false	
@@ -266,33 +303,26 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, at: V
 							_black_can_castle_kingside = false
 							_black_can_castle_queenside = false
 						
-						# Also do the castling if the king is moved	two fields.
-						if at.x == 6 && (selected.color == Figure.COLOR.white && _white_can_castle_kingside || selected.color == Figure.COLOR.black && _black_can_castle_kingside):
-							_set_figure(Vector2i(7, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
-							_set_figure(Vector2i(5, at.y), selected.color, Figure.TYPE.rook)
-						if at.x == 2 && (selected.color == Figure.COLOR.white && _white_can_castle_queenside || selected.color == Figure.COLOR.black && _black_can_castle_queenside):
-							_set_figure(Vector2i(0, at.y), Figure.COLOR.none, Figure.TYPE.pawn)
-							_set_figure(Vector2i(3, at.y), selected.color, Figure.TYPE.rook)
-							
 					if selected.type == Figure.TYPE.rook:
 						if active_player == Figure.COLOR.white:
-							if selected_figure.x == 0:
+							if selected_figure.x == 0 && !is_board_rotated || selected_figure.x == 7 && is_board_rotated:
 								_white_can_castle_queenside = false
-							if selected_figure.x == 7:
+							if selected_figure.x == 0 && is_board_rotated || selected_figure.x == 7 && !is_board_rotated:
 								_white_can_castle_kingside = false
 						if active_player == Figure.COLOR.black:
-							if selected_figure.x == 0:
+							if selected_figure.x == 0 && !is_board_rotated || selected_figure.x == 7 && is_board_rotated:
 								_black_can_castle_queenside = false
-							if selected_figure.x == 7:
+							if selected_figure.x == 0 && is_board_rotated || selected_figure.x == 7 && !is_board_rotated:
 								_black_can_castle_kingside = false
 
+					_en_passant = Vector2i(-1, -1)
 					if selected.type == Figure.TYPE.pawn:
 						# Set en passant if a pawn is moved two fields.
 						# Or reset the en passant if it was only moved one field.
-						if at.y == selected_figure.y + 2 || at.y == selected_figure.y - 2:
-							_en_passant = selected_figure.x
-						else:
-							_en_passant = -1
+						if at.y == selected_figure.y + 2:
+							_en_passant = Vector2i(selected_figure.x, selected_figure.y+1)
+						if at.y == selected_figure.y - 2:
+							_en_passant = Vector2i(selected_figure.x, selected_figure.y-1)
 
 						# If a pawn is moved to the last row, then it is promoted.
 						if at.y == 0 || at.y == 7:
@@ -337,6 +367,26 @@ func _toggle_active_player():
 	else:
 		active_player = Figure.COLOR.white
 
+	if rotate_board_after_move:
+		# Rotate the board by 180 degrees.
+		# Do this by rotating each figure coordinates.
+		var rotated_figures = figures.duplicate(true)
+		for x in 8:
+			for y in 8:
+				var rotated = _vector2i_rotate180(true, x, y)
+				rotated_figures[rotated.x][rotated.y] = figures[x][y]
+				rotated_figures[rotated.x][rotated.y].position = _to_global(rotated)
+				
+				# Rewire the signal
+				var figure: CollisionObject2D = rotated_figures[rotated.x][rotated.y]
+				for s in figure.input_event.get_connections():
+					figure.input_event.disconnect(s.callable)
+				figure.input_event.connect(_on_Figure_Input.bind(rotated))
+		is_board_rotated = !is_board_rotated
+		figures = rotated_figures
+		_en_passant = _vector2i_rotate180(true, _en_passant.x, _en_passant.y)
+		
+
 func _highlight_clear():
 	tile_map.clear_layer(1)
 
@@ -366,19 +416,25 @@ func _get_possible_moves(board: Array, at: Vector2i) -> Array:
 		_check(board, figure, Vector2i(at.x-1, at.y-1), result)
 
 		if _can_do_castle(board, at, Vector2i(0, at.y)):
-			result.append(Vector2i(6, at.y))
+			if is_board_rotated:
+				result.append(Vector2i(1, at.y))
+			else:
+				result.append(Vector2i(2, at.y))
 		if _can_do_castle(board, at, Vector2i(7, at.y)):
-			result.append(Vector2i(2, at.y))
+			if is_board_rotated:
+				result.append(Vector2i(5, at.y))
+			else:
+				result.append(Vector2i(6, at.y))
 	
 	#Moves of pawns.
 	if figure.type == Figure.TYPE.pawn:
-		if figure.color == Figure.COLOR.white && !rotate_board || figure.color == Figure.COLOR.black && rotate_board:
+		if figure.color == Figure.COLOR.white && !is_board_rotated || figure.color == Figure.COLOR.black && is_board_rotated:
 			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x-1, at.y+1), result)
 			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x+1, at.y+1), result)
 			var blocked = _check_no_attack(board, Vector2i(at.x, at.y+1), result)
 			if at.y == 1 && !blocked:
 				_check_no_attack(board, Vector2i(at.x, at.y+2), result)
-		if figure.color == Figure.COLOR.black && !rotate_board || figure.color == Figure.COLOR.white && rotate_board:
+		if figure.color == Figure.COLOR.black && !is_board_rotated || figure.color == Figure.COLOR.white && is_board_rotated:
 			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x-1, at.y-1), result)
 			_check_only_attack_or_en_passant(board, figure, Vector2i(at.x+1, at.y-1), result)
 			var blocked =_check_no_attack(board, Vector2i(at.x, at.y-1), result)
@@ -432,7 +488,7 @@ func _check_only_attack_or_en_passant(board: Array, figure: Figure, to_check: Ve
 	var to_check_figure: Figure = _get_figure_in(board, to_check)
 	if to_check_figure != null && to_check_figure.color != Figure.COLOR.none && to_check_figure.color != figure.color:
 		result.append(to_check)
-	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none && to_check.x == _en_passant:
+	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none && to_check == _en_passant:
 		result.append(to_check)
 
 # Checks all diagonal moves.
