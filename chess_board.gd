@@ -494,42 +494,42 @@ func _check_only_attack_or_en_passant(board: Array, figure: Figure, to_check: Ve
 # Checks all diagonal moves.
 func _check_all_diagonal(board: Array, figure: Figure, at: Vector2i, result: Array):
 	# To top left.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x-i, at.y+i), result):
 			break
 
 	# To top right.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x+i, at.y+i), result):
 			break
 
 	# To bottom left.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x-i, at.y-i), result):
 			break
 
 	# To bottom right.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x+i, at.y-i), result):
 			break
 
 func _check_all_straight(board: Array, figure: Figure, at: Vector2i, result: Array):
 	# To top.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x, at.y+i), result):
 			break
 
 	# To bottom.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x, at.y-i), result):
 			break
 
 	# To left.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x-i, at.y), result):
 			break
 
 	# To right.
-	for i in range(1, 7):
+	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x+i, at.y), result):
 			break
