@@ -49,7 +49,7 @@ static func to_map(at: Vector2i) -> Vector2i:
 	return Vector2i(at.x, 7 - at.y)
 
 func toggle_active_player():
-	if _map.active_player == Figure.COLOR.white:
-		_map.active_player = Figure.COLOR.black
+	if active_player == Figure.COLOR.white:
+		active_player = Figure.COLOR.black
 	else:
-		_map.active_player = Figure.COLOR.white
+		active_player = Figure.COLOR.white

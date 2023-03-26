@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://buhu5bqpo3unv"]
 
-[ext_resource type="PackedScene" uid="uid://bub1dd7fx1pob" path="res://objects/chess_board/ChessBoard.tscn" id="1_77jxg"]
+[ext_resource type="PackedScene" uid="uid://dbf4swclulnym" path="res://objects/chess_board/ChessBoard.tscn" id="1_77jxg"]
 
 [node name="game" type="Node2D"]
 
