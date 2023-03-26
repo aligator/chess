@@ -1,26 +1,21 @@
-# This chess implementation uses a very naive approach using a two dimensional
-# array. It should easily be fast enough to just check one figure.
-
+class_name ChessBoard
 extends Node2D
 
-@export var figure_scene: PackedScene = preload("res://objects/figure/figure.tscn")
+# Chess board implementation, with the abiltiy to 
+# highlight possible moves.
+
+# Less checks for possible moves, only for debgging.
 @export var debug_moves: bool = false
 @export var rotate_board_after_move: bool = true
 @export var is_board_rotated: bool = false
 
-@onready var tile_map: TileMap = $TileMap
+@export var king_in_danger = false
+@export var checkmate = false
+@export var stalemate = false
 
-
-var active_player: Figure.COLOR = Figure.COLOR.white
-
-var chess_board: Array = []
-
-var selected_figure: Vector2i = Vector2i(-1, -1)
-
-var king_in_danger = false
-
-var checkmate = false
-var stalemate = false
+var _active_player: Figure.COLOR = Figure.COLOR.white
+var _board: Array = []
+var _selected_figure: Vector2i = Vector2i(-1, -1)
 
 var _white_can_castle_kingside = true
 var _white_can_castle_queenside = true
@@ -30,8 +25,33 @@ var _black_can_castle_queenside = true
 # The en passant is the position where a pawn can be captured in the next move.
 var _en_passant: Vector2i = Vector2i(-1, -1)
 
+@onready var _tile_map: TileMap = $TileMap
+@onready var _figure_scene: PackedScene = load($Figure.scene_file_path)
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	fill_board()
+	reset_board()
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(_delta):
+	var tile_size = _tile_map.tile_set.tile_size
+
+	# Update the _board based on the rotation.
+	for x in range(8):
+		for y in range(8):
+			var figure = _board[x][y]
+			if is_board_rotated:
+				figure.rotation_degrees = 180
+				_tile_map.rotation_degrees = 180
+				_tile_map.position = tile_size * 7 + tile_size
+			else:
+				figure.rotation_degrees = 0
+				_tile_map.rotation_degrees = 0
+				_tile_map.position = Vector2i(0, 0)
+
 func _get_figure(at: Vector2i) -> Figure: 
-	return _get_figure_in(chess_board, at)
+	return _get_figure_in(_board, at)
 
 func _get_figure_in(board:Array, at: Vector2i) -> Figure: 
 	if at.x < 0 || at.x >= 8 || at.y < 0 || at.y >= 8:
@@ -42,7 +62,7 @@ func _get_figure_in(board:Array, at: Vector2i) -> Figure:
 # _setsFigure to the given state.
 # This does not validate anything.
 func _set_figure(at: Vector2i, color: Figure.COLOR, type: Figure.TYPE):
-	_set_figure_in(chess_board, at, color, type)
+	_set_figure_in(_board, at, color, type)
 
 # _setsFigure to the given state.
 # This does not validate anything.
@@ -53,35 +73,32 @@ func _set_figure_in(board: Array, at: Vector2i, color: Figure.COLOR, type: Figur
 func _to_map(at: Vector2i) -> Vector2i:
 	return Vector2i(at.x, 7 - at.y)
 func _to_global(at: Vector2i) -> Vector2:
-	var tile_size = tile_map.tile_set.tile_size
-	var offset: Vector2 = tile_map.position + Vector2(tile_size / 2)
+	var tile_size = _tile_map.tile_set.tile_size
+	var offset: Vector2 = _tile_map.position + Vector2(tile_size / 2)
 	return (Vector2(_to_map(at)) * Vector2(tile_size)) + offset
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	var tile_size = tile_map.tile_set.tile_size
-	var offset: Vector2 = tile_map.position + Vector2(tile_size / 2)
+func fill_board():
+	var tile_size = _tile_map.tile_set.tile_size
+	var offset: Vector2 = _tile_map.position + Vector2(tile_size / 2)
 	
 	# Fill the board with the starting setup.
 	for x in 8:
-		chess_board.append([])
+		_board.append([])
 		for y in 8:
-			var figure: Figure = figure_scene.instantiate()
+			var figure: Figure = _figure_scene.instantiate()
 			figure.position.x = x * tile_size.x + offset.x
 			figure.position.y = tile_size.y * 7 - y * tile_size.y + offset.y
 			figure.color = Figure.COLOR.none
 			
 			(figure as CollisionObject2D).input_event.connect(_on_Figure_Input.bind(Vector2i(x, y)))
 			
-			chess_board[x].append(figure)
-			tile_map.add_child(chess_board[x][y])
-	
-	_reset_board()
+			_board[x].append(figure)
+			_tile_map.add_child(_board[x][y])
 
-func _reset_board():
+func reset_board():
 	_highlight_clear()
 		
-	selected_figure = Vector2i(-1, -1)
+	_selected_figure = Vector2i(-1, -1)
 	
 	king_in_danger = false
 	
@@ -131,31 +148,12 @@ func _reset_board():
 
 func _rotate_board(): 
 	is_board_rotated = !is_board_rotated
-	
-	var tile_size = tile_map.tile_set.tile_size
-
-	# Update the chess_board based on the rotation.
-	for x in range(8):
-		for y in range(8):
-			var figure = chess_board[x][y]
-			if is_board_rotated:
-				figure.rotation_degrees = 180
-				tile_map.rotation_degrees = 180
-				tile_map.position = tile_size * 7 + tile_size
-			else:
-				figure.rotation_degrees = 0
-				tile_map.rotation_degrees = 0
-				tile_map.position = Vector2i(0, 0)
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta):
-	pass
 
 func _find_current_king(board: Array):
 	for x in range(8):
 		for y in range(8):
 			var figure = _get_figure_in(board, Vector2i(x, y))
-			if figure != null && figure.color == active_player && figure.type == Figure.TYPE.king:
+			if figure != null && figure.color == _active_player && figure.type == Figure.TYPE.king:
 				return Vector2i(x, y)
 	return null
 
@@ -164,7 +162,7 @@ func _check_king_in_danger(board: Array, king_pos: Vector2i) -> bool:
 		for y in range(8):
 			var enemy_figure = _get_figure_in(board, Vector2i(x, y))
 			# If it is really an enemey:
-			if enemy_figure.color != active_player:
+			if enemy_figure.color != _active_player:
 				var possible_moves = _get_possible_moves(board, Vector2i(x, y))
 				for move in possible_moves:
 					if move == king_pos:
@@ -172,21 +170,21 @@ func _check_king_in_danger(board: Array, king_pos: Vector2i) -> bool:
 						
 	return false
 
-func _clone_chess_board() -> Array:
-	var chess_board_clone = []
+func _clone__board() -> Array:
+	var _board_clone = []
 
 	for x in 8:
-		chess_board_clone.append([])
+		_board_clone.append([])
 		for y in 8:
 			var figure = _get_figure(Vector2i(x, y))
-			var new_figure: Figure = figure_scene.instantiate()
+			var new_figure: Figure = _figure_scene.instantiate()
 			new_figure.position.x = figure.position.x
 			new_figure.position.y = figure.position.y
 			new_figure.color =  figure.color
 			new_figure.type =  figure.type
-			chess_board_clone[x].append(new_figure)
+			_board_clone[x].append(new_figure)
 
-	return chess_board_clone
+	return _board_clone
 
 func _free_board(board: Array):
 	for x in range(8):
@@ -217,7 +215,7 @@ func _execute_castling(board: Array, source_figure: Figure, move: Vector2i, upda
 func _filter_illegal_moves(possible_moves: Array, source: Vector2i):
 	# Filter all moves that would put the king in danger.
 	for move in possible_moves.duplicate(): # (duplicate is needed because otherwise the array is modified while iterating over it)
-		var board_copy = _clone_chess_board()
+		var board_copy = _clone__board()
 		var source_figure = _get_figure_in(board_copy, source)
 		if source_figure != null:
 			_execute_castling(board_copy, source_figure, move, false)
@@ -239,8 +237,8 @@ func _check_checkmate_stalemate():
 	for x in range(8):
 		for y in range(8):
 			var figure = _get_figure(Vector2i(x, y))
-			if figure.color == active_player:
-				var possible_moves = _get_possible_moves(chess_board, Vector2i(x, y))
+			if figure.color == _active_player:
+				var possible_moves = _get_possible_moves(_board, Vector2i(x, y))
 				
 				# For every own figure, check if there is any possible move.
 				# If there is no such move, then it is stalemate.
@@ -263,7 +261,7 @@ func _can_do_castle(board: Array, source: Vector2i, target: Vector2i) -> bool:
 	if source_figure == null || target_figure == null:
 		return false
 	
-	if source_figure.color != active_player || target_figure.color != active_player:
+	if source_figure.color != _active_player || target_figure.color != _active_player:
 		return false
 	
 	if source_figure.type != Figure.TYPE.king || target_figure.type != Figure.TYPE.rook:
@@ -275,7 +273,7 @@ func _can_do_castle(board: Array, source: Vector2i, target: Vector2i) -> bool:
 	else:
 		direction = -1
 
-	if active_player == Figure.COLOR.white:
+	if _active_player == Figure.COLOR.white:
 		if direction == 1 && !(_white_can_castle_kingside):
 			return false
 		if direction == -1 && !(_white_can_castle_queenside):
@@ -300,44 +298,44 @@ func _can_do_castle(board: Array, source: Vector2i, target: Vector2i) -> bool:
 
 func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, move: Vector2i):
 	if event is InputEventMouseButton:
-		if event.pressed && selected_figure != move:
+		if event.pressed && _selected_figure != move:
 			var event_figure = _get_figure(move)
 
 			if event_figure == null:
 				return
 			
-			if event_figure.color == Figure.COLOR.none || event_figure.color != active_player:
+			if event_figure.color == Figure.COLOR.none || event_figure.color != _active_player:
 				# A NONE figure or an enemy is selected.
 				# If it is a valid move -> e.g. the field is highlited, then just make the move.
-				var tile: TileData = tile_map.get_cell_tile_data(1, _to_map(move))
+				var tile: TileData = _tile_map.get_cell_tile_data(1, _to_map(move))
 				# If the tile exists in that layer, it is highlighted.
 				if tile != null:
-					var selected = _get_figure(selected_figure)
+					var selected = _get_figure(_selected_figure)
 
 					# Set castling to false if the king or a rook is moved.
 					if selected.type == Figure.TYPE.king:
-						_execute_castling(chess_board, selected, move, true)
+						_execute_castling(_board, selected, move, true)
 						
 					if selected.type == Figure.TYPE.rook:
-						if active_player == Figure.COLOR.white:
-							if selected_figure.x == 0:
+						if _active_player == Figure.COLOR.white:
+							if _selected_figure.x == 0:
 								_white_can_castle_queenside = false
-							if selected_figure.x == 7:
+							if _selected_figure.x == 7:
 								_white_can_castle_kingside = false
-						if active_player == Figure.COLOR.black:
-							if selected_figure.x == 0:
+						if _active_player == Figure.COLOR.black:
+							if _selected_figure.x == 0:
 								_black_can_castle_queenside = false
-							if selected_figure.x == 7:
+							if _selected_figure.x == 7:
 								_black_can_castle_kingside = false
 
 					_en_passant = Vector2i(-1, -1)
 					if selected.type == Figure.TYPE.pawn:
 						# Set en passant if a pawn is moved two fields.
 						# Or reset the en passant if it was only moved one field.
-						if move.y == selected_figure.y + 2:
-							_en_passant = Vector2i(selected_figure.x, selected_figure.y+1)
-						if move.y == selected_figure.y - 2:
-							_en_passant = Vector2i(selected_figure.x, selected_figure.y-1)
+						if move.y == _selected_figure.y + 2:
+							_en_passant = Vector2i(_selected_figure.x, _selected_figure.y+1)
+						if move.y == _selected_figure.y - 2:
+							_en_passant = Vector2i(_selected_figure.x, _selected_figure.y-1)
 
 						# If a pawn is moved to the last row, then it is promoted.
 						if move.y == 0 || move.y == 7:
@@ -345,20 +343,20 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, move:
 							selected.type = Figure.TYPE.queen
 							
 					_set_figure(move, selected.color, selected.type)
-					_set_figure(selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
+					_set_figure(_selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
 
 					selected.selected = false
 					_highlight_clear()
-					selected_figure = Vector2i(-1, -1)
+					_selected_figure = Vector2i(-1, -1)
 					_toggle_active_player()
 					
 					# Check if the current players king is in danger.
-					var king = _find_current_king(chess_board)
+					var king = _find_current_king(_board)
 					king_in_danger = false
 					if king == null:
 						print("no king exists")
 					else:
-						king_in_danger = _check_king_in_danger(chess_board, king)
+						king_in_danger = _check_king_in_danger(_board, king)
 					
 					if king_in_danger:
 						_check_checkmate_stalemate()
@@ -366,33 +364,33 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, move:
 			else:
 				# An own figure is selected.
 				# Switch the selected figure.
-				if _get_figure(selected_figure) != null:
-					_get_figure(selected_figure).selected = false
-				selected_figure = move
+				if _get_figure(_selected_figure) != null:
+					_get_figure(_selected_figure).selected = false
+				_selected_figure = move
 				_get_figure(move).selected = true
 				
-				var possible_moves = _get_possible_moves(chess_board, selected_figure)
+				var possible_moves = _get_possible_moves(_board, _selected_figure)
 				if !debug_moves:
-					_filter_illegal_moves(possible_moves, selected_figure)
+					_filter_illegal_moves(possible_moves, _selected_figure)
 				_highlight_all(possible_moves)
 
 func _toggle_active_player():
-	if active_player == Figure.COLOR.white:
-		active_player = Figure.COLOR.black
+	if _active_player == Figure.COLOR.white:
+		_active_player = Figure.COLOR.black
 	else:
-		active_player = Figure.COLOR.white
+		_active_player = Figure.COLOR.white
 
 	if rotate_board_after_move:
 		_rotate_board()	
 
 func _highlight_clear():
-	tile_map.clear_layer(1)
+	_tile_map.clear_layer(1)
 
 func _highlight_all(positions: Array):
 	_highlight_clear()
 	
 	for i in positions:
-		tile_map.set_cell(1, _to_map(i), 1, Vector2i(0, 0))
+		_tile_map.set_cell(1, _to_map(i), 1, Vector2i(0, 0))
 				
 
 func _get_possible_moves(board: Array, at: Vector2i) -> Array:

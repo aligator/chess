@@ -1,7 +1,7 @@
-@icon("res://Art/WhiteKing.png")
+@icon("res://art/WhiteKing.png")
 
-extends Area2D
 class_name Figure
+extends Area2D
 
 enum COLOR {
 	none,

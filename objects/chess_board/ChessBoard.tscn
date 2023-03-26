@@ -1,16 +1,17 @@
-[gd_scene load_steps=7 format=3 uid="uid://e0gxid2bsj7m"]
+[gd_scene load_steps=8 format=3 uid="uid://bub1dd7fx1pob"]
 
-[ext_resource type="Script" path="res://objects/chess_board/chess_board.gd" id="1_xygse"]
-[ext_resource type="Texture2D" uid="uid://canm3h7lk0cat" path="res://art/board_tiles.png" id="2_f2j88"]
-[ext_resource type="Texture2D" uid="uid://c18tmda7ssrj" path="res://art/selector.png" id="3_ny8wq"]
+[ext_resource type="Script" path="res://objects/chess_board/ChessBoard.gd" id="1_abfrl"]
+[ext_resource type="Texture2D" uid="uid://canm3h7lk0cat" path="res://art/board_tiles.png" id="3_buajl"]
+[ext_resource type="Texture2D" uid="uid://c18tmda7ssrj" path="res://art/selector.png" id="4_bphue"]
+[ext_resource type="PackedScene" uid="uid://djp3r134w5yr3" path="res://objects/figure/Figure.tscn" id="5_es8j3"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4hg6k"]
-texture = ExtResource("2_f2j88")
+texture = ExtResource("3_buajl")
 0:0/0 = 0
 1:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wa2hw"]
-texture = ExtResource("3_ny8wq")
+texture = ExtResource("4_bphue")
 0:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_vu2p3"]
@@ -18,7 +19,7 @@ sources/0 = SubResource("TileSetAtlasSource_4hg6k")
 sources/1 = SubResource("TileSetAtlasSource_wa2hw")
 
 [node name="ChessBoard" type="Node2D"]
-script = ExtResource("1_xygse")
+script = ExtResource("1_abfrl")
 
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = SubResource("TileSet_vu2p3")
@@ -32,3 +33,6 @@ layer_1/y_sort_enabled = false
 layer_1/y_sort_origin = 0
 layer_1/z_index = 0
 layer_1/tile_data = PackedInt32Array()
+
+[node name="Figure" parent="." instance=ExtResource("5_es8j3")]
+visible = false
