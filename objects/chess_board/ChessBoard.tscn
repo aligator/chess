@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://bub1dd7fx1pob"]
+[gd_scene load_steps=9 format=3 uid="uid://dbf4swclulnym"]
 
 [ext_resource type="Script" path="res://objects/chess_board/ChessBoard.gd" id="1_abfrl"]
 [ext_resource type="Texture2D" uid="uid://canm3h7lk0cat" path="res://art/board_tiles.png" id="3_buajl"]
 [ext_resource type="Texture2D" uid="uid://c18tmda7ssrj" path="res://art/selector.png" id="4_bphue"]
+[ext_resource type="Script" path="res://objects/chess_board/ChessMap.gd" id="4_txciu"]
 [ext_resource type="PackedScene" uid="uid://djp3r134w5yr3" path="res://objects/figure/Figure.tscn" id="5_es8j3"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4hg6k"]
@@ -21,7 +22,7 @@ sources/1 = SubResource("TileSetAtlasSource_wa2hw")
 [node name="ChessBoard" type="Node2D"]
 script = ExtResource("1_abfrl")
 
-[node name="TileMap" type="TileMap" parent="."]
+[node name="ChessMap" type="TileMap" parent="."]
 tile_set = SubResource("TileSet_vu2p3")
 format = 2
 layer_0/name = "Board"
@@ -33,6 +34,260 @@ layer_1/y_sort_enabled = false
 layer_1/y_sort_origin = 0
 layer_1/z_index = 0
 layer_1/tile_data = PackedInt32Array()
+script = ExtResource("4_txciu")
 
-[node name="Figure" parent="." instance=ExtResource("5_es8j3")]
-visible = false
+[node name="Figure" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 120)
+type = 2
+
+[node name="Figure2" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 104)
+
+[node name="Figure3" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 88)
+color = 0
+
+[node name="Figure4" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 72)
+color = 0
+
+[node name="Figure5" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 56)
+color = 0
+
+[node name="Figure6" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 40)
+color = 0
+
+[node name="Figure7" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 24)
+color = 2
+
+[node name="Figure8" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(8, 8)
+color = 2
+type = 2
+
+[node name="Figure9" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 120)
+type = 3
+
+[node name="Figure10" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 104)
+
+[node name="Figure11" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 88)
+color = 0
+
+[node name="Figure12" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 72)
+color = 0
+
+[node name="Figure13" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 56)
+color = 0
+
+[node name="Figure14" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 40)
+color = 0
+
+[node name="Figure15" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 24)
+color = 2
+
+[node name="Figure16" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(24, 8)
+color = 2
+type = 3
+
+[node name="Figure17" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 120)
+type = 4
+
+[node name="Figure18" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 104)
+
+[node name="Figure19" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 88)
+color = 0
+
+[node name="Figure20" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 72)
+color = 0
+
+[node name="Figure21" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 56)
+color = 0
+
+[node name="Figure22" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 40)
+color = 0
+
+[node name="Figure23" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 24)
+color = 2
+
+[node name="Figure24" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(40, 8)
+color = 2
+type = 4
+
+[node name="Figure25" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 120)
+type = 0
+
+[node name="Figure26" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 104)
+
+[node name="Figure27" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 88)
+color = 0
+
+[node name="Figure28" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 72)
+color = 0
+
+[node name="Figure29" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 56)
+color = 0
+
+[node name="Figure30" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 40)
+color = 0
+
+[node name="Figure31" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 24)
+color = 2
+
+[node name="Figure32" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(56, 8)
+color = 2
+type = 0
+
+[node name="Figure33" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 120)
+type = 1
+
+[node name="Figure34" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 104)
+
+[node name="Figure35" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 88)
+color = 0
+
+[node name="Figure36" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 72)
+color = 0
+
+[node name="Figure37" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 56)
+color = 0
+
+[node name="Figure38" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 40)
+color = 0
+
+[node name="Figure39" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 24)
+color = 2
+
+[node name="Figure40" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(72, 8)
+color = 2
+type = 1
+
+[node name="Figure41" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 120)
+type = 4
+
+[node name="Figure42" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 104)
+
+[node name="Figure43" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 88)
+color = 0
+
+[node name="Figure44" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 72)
+color = 0
+
+[node name="Figure45" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 56)
+color = 0
+
+[node name="Figure46" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 40)
+color = 0
+
+[node name="Figure47" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 24)
+color = 2
+
+[node name="Figure48" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(88, 8)
+color = 2
+type = 4
+
+[node name="Figure49" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 120)
+type = 3
+
+[node name="Figure50" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 104)
+
+[node name="Figure51" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 88)
+color = 0
+
+[node name="Figure52" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 72)
+color = 0
+
+[node name="Figure53" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 56)
+color = 0
+
+[node name="Figure54" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 40)
+color = 0
+
+[node name="Figure55" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 24)
+color = 2
+
+[node name="Figure56" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(104, 8)
+color = 2
+type = 3
+
+[node name="Figure57" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 120)
+type = 2
+
+[node name="Figure58" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 104)
+
+[node name="Figure59" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 88)
+color = 0
+
+[node name="Figure60" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 72)
+color = 0
+
+[node name="Figure61" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 56)
+color = 0
+
+[node name="Figure62" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 40)
+color = 0
+
+[node name="Figure63" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 24)
+color = 2
+
+[node name="Figure64" parent="ChessMap" instance=ExtResource("5_es8j3")]
+position = Vector2(120, 8)
+color = 2
+type = 2
