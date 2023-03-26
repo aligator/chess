@@ -7,7 +7,25 @@ extends Node2D
 # Less checks for possible moves, only for debgging.
 @export var debug_moves: bool = false
 @export var rotate_board_after_move: bool = true
-@export var is_board_rotated: bool = false
+@export var is_board_rotated: bool = false : 
+	get:
+		return is_board_rotated
+	set(value):
+		is_board_rotated = value
+		
+		var tile_size = _tile_map.tile_set.tile_size
+		# Update the _board based on the rotation.
+		for x in range(8):
+			for y in range(8):
+				var figure = _board[x][y]
+				if is_board_rotated:
+					figure.rotation_degrees = 180
+					_tile_map.rotation_degrees = 180
+					_tile_map.position = tile_size * 7 + tile_size
+				else:
+					figure.rotation_degrees = 0
+					_tile_map.rotation_degrees = 0
+					_tile_map.position = Vector2i(0, 0)
 
 @export var king_in_danger = false
 @export var checkmate = false
@@ -35,20 +53,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	var tile_size = _tile_map.tile_set.tile_size
-
-	# Update the _board based on the rotation.
-	for x in range(8):
-		for y in range(8):
-			var figure = _board[x][y]
-			if is_board_rotated:
-				figure.rotation_degrees = 180
-				_tile_map.rotation_degrees = 180
-				_tile_map.position = tile_size * 7 + tile_size
-			else:
-				figure.rotation_degrees = 0
-				_tile_map.rotation_degrees = 0
-				_tile_map.position = Vector2i(0, 0)
+	pass
 
 func _get_figure(at: Vector2i) -> Figure: 
 	return _get_figure_in(_board, at)
