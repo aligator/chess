@@ -1,16 +1,16 @@
-[gd_scene load_steps=7 format=3 uid="uid://be43cg5h2d73s"]
+[gd_scene load_steps=7 format=3 uid="uid://e0gxid2bsj7m"]
 
-[ext_resource type="Script" path="res://chess_board.gd" id="1_1iw3g"]
-[ext_resource type="Texture2D" uid="uid://canm3h7lk0cat" path="res://Art/board_tiles.png" id="1_ib75b"]
-[ext_resource type="Texture2D" uid="uid://c18tmda7ssrj" path="res://Art/selector.png" id="3_vlmmi"]
+[ext_resource type="Script" path="res://objects/chess_board/chess_board.gd" id="1_xygse"]
+[ext_resource type="Texture2D" uid="uid://canm3h7lk0cat" path="res://art/board_tiles.png" id="2_f2j88"]
+[ext_resource type="Texture2D" uid="uid://c18tmda7ssrj" path="res://art/selector.png" id="3_ny8wq"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4hg6k"]
-texture = ExtResource("1_ib75b")
+texture = ExtResource("2_f2j88")
 0:0/0 = 0
 1:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wa2hw"]
-texture = ExtResource("3_vlmmi")
+texture = ExtResource("3_ny8wq")
 0:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_vu2p3"]
@@ -18,8 +18,7 @@ sources/0 = SubResource("TileSetAtlasSource_4hg6k")
 sources/1 = SubResource("TileSetAtlasSource_wa2hw")
 
 [node name="ChessBoard" type="Node2D"]
-position = Vector2(16, 16)
-script = ExtResource("1_1iw3g")
+script = ExtResource("1_xygse")
 
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = SubResource("TileSet_vu2p3")

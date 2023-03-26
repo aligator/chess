@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dpewx1xqbqpyc"
-path="res://.godot/imported/WhiteKing.png-85f87f043d54b3758babdcacb21dcac6.ctex"
+uid="uid://canm3h7lk0cat"
+path="res://.godot/imported/board_tiles.png-c5f449dc9e5beb82cfe8ec45f5b0b5ea.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Art/WhiteKing.png"
-dest_files=["res://.godot/imported/WhiteKing.png-85f87f043d54b3758babdcacb21dcac6.ctex"]
+source_file="res://art/board_tiles.png"
+dest_files=["res://.godot/imported/board_tiles.png-c5f449dc9e5beb82cfe8ec45f5b0b5ea.ctex"]
 
 [params]
 
