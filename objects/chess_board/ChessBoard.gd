@@ -55,7 +55,7 @@ func _reset_board():
 func _process(_delta):
 	pass
 
-func _get_figure_in(board:Array, at: Vector2i) -> Figure: 
+func _get_figure_in(board: Array, at: Vector2i) -> Figure: 
 	if at.x < 0 || at.x >= 8 || at.y < 0 || at.y >= 8:
 		return null
 	
@@ -133,7 +133,7 @@ func _execute_castling(board: Array, source_figure: Figure, move: Vector2i, upda
 				_map.black_can_castle_queenside = false
 
 
-func _filter_illegal_moves(possible_moves: Array, source: Vector2i):
+func _filter_illegal_moves(possible_moves: Array[Vector2i], source: Vector2i):
 	# Filter all moves that would put the king in danger.
 	for move in possible_moves.duplicate(): # (duplicate is needed because otherwise the array is modified while iterating over it)
 		var board_copy = _clone_board()
@@ -276,19 +276,19 @@ func _toggle_active_player():
 	if rotate_board_after_move:
 		_rotate_board()	
 
-func _highlight_all(positions: Array):
+func _highlight_all(positions: Array[Vector2i]):
 	_map.highlight_clear()
 	
 	for i in positions:
 		_map.set_cell(1, ChessMap.to_map(i), 1, Vector2i(0, 0))
 				
 
-func _get_possible_moves(board: Array, at: Vector2i) -> Array:
+func _get_possible_moves(board: Array, at: Vector2i) -> Array[Vector2i]:
 	# I use simple KISS ifs for now. Should be easy to understand 
 	# and there is no need for any complicated algorithm.
 	
 	var figure: Figure = _get_figure_in(board, at)
-	var result: Array = []
+	var result: Array[Vector2i] = []
 	
 	# The king can move in all directions, one step only.
 	if figure.type == Figure.TYPE.king:
@@ -372,7 +372,7 @@ func _check_checkmate_stalemate():
 	checkmate = is_checkmate
 	stalemate = is_stalemate
 
-func _check(board: Array, figure: Figure, to_check: Vector2i, result: Array) -> bool:
+func _check(board: Array, figure: Figure, to_check: Vector2i, result: Array[Vector2i]) -> bool:
 	var to_check_figure: Figure = _get_figure_in(board, to_check)
 	if to_check_figure != null && to_check_figure.color != figure.color:
 		result.append(to_check)
@@ -380,7 +380,7 @@ func _check(board: Array, figure: Figure, to_check: Vector2i, result: Array) -> 
 	return to_check_figure == null || to_check_figure.color != Figure.COLOR.none
 
 # Same as _check but attack is not allowed.
-func _check_no_attack(board: Array, to_check: Vector2i, result: Array) -> bool:
+func _check_no_attack(board: Array, to_check: Vector2i, result: Array[Vector2i]) -> bool:
 	var to_check_figure: Figure = _get_figure_in(board, to_check)
 	if to_check_figure != null && to_check_figure.color == Figure.COLOR.none:
 		result.append(to_check)
@@ -389,7 +389,7 @@ func _check_no_attack(board: Array, to_check: Vector2i, result: Array) -> bool:
 
 # Same as _check but only attack is allowed.
 # However, en passant is also allowed.
-func _check_only_attack_or_en_passant(board: Array, figure: Figure, to_check: Vector2i, result: Array):
+func _check_only_attack_or_en_passant(board: Array, figure: Figure, to_check: Vector2i, result: Array[Vector2i]):
 	var to_check_figure: Figure = _get_figure_in(board, to_check)
 	if to_check_figure != null && to_check_figure.color != Figure.COLOR.none && to_check_figure.color != figure.color:
 		result.append(to_check)
@@ -397,7 +397,7 @@ func _check_only_attack_or_en_passant(board: Array, figure: Figure, to_check: Ve
 		result.append(to_check)
 
 # Checks all diagonal moves.
-func _check_all_diagonal(board: Array, figure: Figure, at: Vector2i, result: Array):
+func _check_all_diagonal(board: Array, figure: Figure, at: Vector2i, result: Array[Vector2i]):
 	# To top left.
 	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x-i, at.y+i), result):
@@ -418,7 +418,7 @@ func _check_all_diagonal(board: Array, figure: Figure, at: Vector2i, result: Arr
 		if _check(board, figure, Vector2i(at.x+i, at.y-i), result):
 			break
 
-func _check_all_straight(board: Array, figure: Figure, at: Vector2i, result: Array):
+func _check_all_straight(board: Array, figure: Figure, at: Vector2i, result: Array[Vector2i]):
 	# To top.
 	for i in range(1, 8):
 		if _check(board, figure, Vector2i(at.x, at.y+i), result):

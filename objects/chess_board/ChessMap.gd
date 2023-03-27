@@ -20,7 +20,6 @@ func _ready():
 		board.append([])
 		for y in 8:		
 			board[x].append(figures[x*8+y])
-			add_child(board[x][y])
 	
 	reset_board()
 
