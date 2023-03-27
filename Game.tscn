@@ -8,18 +8,18 @@
 script = ExtResource("1_k6fgx")
 
 [node name="ChessBoard" parent="." instance=ExtResource("1_gbx6s")]
-position = Vector2(16, 16)
+position = Vector2(8, 16)
 debug_moves = null
 rotate_board_after_move = null
 is_board_rotated = null
 
 [node name="FigureListBlack" parent="." instance=ExtResource("2_3ok37")]
-position = Vector2(20, 12)
+position = Vector2(12, 12)
 scale = Vector2(0.5, 0.5)
 color = 2
 gap = 0
 
 [node name="FigureListWhite" parent="." instance=ExtResource("2_3ok37")]
-position = Vector2(20, 4)
+position = Vector2(12, 4)
 scale = Vector2(0.5, 0.5)
 gap = 0
