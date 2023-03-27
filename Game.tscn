@@ -1,8 +1,25 @@
-[gd_scene load_steps=2 format=3 uid="uid://buhu5bqpo3unv"]
+[gd_scene load_steps=4 format=3 uid="uid://buhu5bqpo3unv"]
 
 [ext_resource type="PackedScene" uid="uid://dbf4swclulnym" path="res://objects/chess_board/ChessBoard.tscn" id="1_gbx6s"]
+[ext_resource type="Script" path="res://Game.gd" id="1_k6fgx"]
+[ext_resource type="PackedScene" uid="uid://cxxsadpiw0t8a" path="res://objects/figure_list/FigureList.tscn" id="2_3ok37"]
 
 [node name="Game" type="Node2D"]
+script = ExtResource("1_k6fgx")
 
 [node name="ChessBoard" parent="." instance=ExtResource("1_gbx6s")]
 position = Vector2(16, 16)
+debug_moves = null
+rotate_board_after_move = null
+is_board_rotated = null
+
+[node name="FigureListBlack" parent="." instance=ExtResource("2_3ok37")]
+position = Vector2(20, 12)
+scale = Vector2(0.5, 0.5)
+color = 2
+gap = 0
+
+[node name="FigureListWhite" parent="." instance=ExtResource("2_3ok37")]
+position = Vector2(20, 4)
+scale = Vector2(0.5, 0.5)
+gap = 0

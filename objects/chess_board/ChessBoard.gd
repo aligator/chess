@@ -4,6 +4,8 @@ extends Node2D
 # Chess board implementation, with the abillity to 
 # highlight possible moves.
 
+signal figure_killed(color: Figure.COLOR, type: Figure.TYPE)
+
 # Less checks for possible moves, only for debgging.
 @export var debug_moves: bool = false
 @export var rotate_board_after_move: bool = true
@@ -239,6 +241,10 @@ func _on_Figure_Input(_viewport: Node, event: InputEvent, _shape_idx: int, move:
 							# TODO: Implement a way to select the figure type.
 							selected.type = Figure.TYPE.queen
 							
+					var target = _map.get_figure(move)
+					if target.color != Figure.COLOR.none && target.color != selected.color:
+						figure_killed.emit(target.color, target.type)
+
 					_map.set_figure(move, selected.color, selected.type)
 					_map.set_figure(_map.selected_figure, Figure.COLOR.none, Figure.TYPE.pawn)
 

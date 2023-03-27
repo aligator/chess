@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxxsadpiw0t8a"]
+
+[ext_resource type="Script" path="res://objects/figure_list/FigureList.gd" id="1_r4hnu"]
+
+[node name="FigureList" type="Node2D"]
+script = ExtResource("1_r4hnu")

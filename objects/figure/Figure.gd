@@ -26,6 +26,12 @@ enum TYPE {
 @onready var animation_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var selector: Sprite2D = $Selector
 
+const _scene = preload("Figure.tscn")
+
+static func instantiate() -> Figure:
+	var figure = _scene.instantiate()
+	return figure
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass
@@ -44,3 +50,7 @@ func _process(_delta):
 	animation_sprite.set_frame_and_progress(type, 1)
 	
 	selector.visible = selected
+	
+func get_size() -> Vector2:
+	var frame = animation_sprite.sprite_frames.get_frame_texture("black", 0)
+	return frame.get_size() * transform.get_scale()
